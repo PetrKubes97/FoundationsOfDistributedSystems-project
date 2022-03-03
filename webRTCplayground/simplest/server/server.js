@@ -14,9 +14,9 @@ app.get("/", (req, res) => {
 io.on("connection", (socket) => {
     console.log("a user connected")
 
-    socket.on("message", (message) => {
-        console.log("broadcasting")
-        socket.broadcast.emit('message', message)
+    socket.on("message", ({channel, message}) => {
+        console.log("broadcasting: ", message)
+        socket.broadcast.emit(channel, message)
     })
 
     socket.on("disconnect", () => {

@@ -23,7 +23,7 @@ connection.ondatachannel = (channelEvent) => {
     console.log(channelEvent)
 }
 connection.onicecandidate = (iceEvent) => {
-    console.log(iceEvent)
+    console.log("onIceCandidate:", iceEvent)
     if (iceEvent.candidate) {
         sendMessage(ICE_OFFER, {
             label: iceEvent.candidate.sdpMLineIndex,
@@ -46,7 +46,7 @@ const initializeConnection = () => {
     isRoot = true
 
     const channelChangedCallback = (e) => {
-        console.log(e)
+        console.log("channel changed:", e)
     }
 
     channel = connection.createDataChannel("sendDataChannel", null)
@@ -73,7 +73,7 @@ socket.on("message", (message) => {
 })
 
 socket.on(ROOT_OFFER, (message) => {
-    console.log("Client received message:", message)
+    console.log("Client received ROOT_OFFER:", message)
     connection.setRemoteDescription(message)
         .then(() => connection.createAnswer())
         .then((answer) => connection.setLocalDescription(answer))
@@ -82,7 +82,7 @@ socket.on(ROOT_OFFER, (message) => {
 })
 
 socket.on(NODE_OFFER, (message) => {
-    console.log("Client received message:", message)
+    console.log("Client received NODE_OFFER:", message)
     connection.setRemoteDescription(message)
 })
 
@@ -96,7 +96,7 @@ socket.on(ICE_OFFER, (message) => {
 
 const sendMessage = (channel, message) => {
     console.log("Client sending message: ", message, channel)
-    socket.emit("message", message)
+    socket.emit('message', {channel, message})
 }
 
 const handleDescriptionError = (e) => console.error(e)
