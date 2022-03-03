@@ -2,12 +2,17 @@ import { useState } from 'react'
 import logo from './logo.svg'
 import './App.css'
 
+import PixiComp from './PixiShit'
+
+
 function App() {
   const [count, setCount] = useState(0)
 
   return (
     <div className="App">
       <header className="App-header">
+        
+        <PixiComp/>
         <img src={logo} className="App-logo" alt="logo" />
         <p>Hello Vite + React!</p>
         <p>
