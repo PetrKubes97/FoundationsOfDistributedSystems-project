@@ -19,8 +19,15 @@ const ICE_OFFER = "root_ice_offer"
 let isRoot = false
 
 const connection = new RTCPeerConnection()
+
+let channel
 connection.ondatachannel = (channelEvent) => {
     console.log(channelEvent)
+    channel = channelEvent.channel
+    channel.onmessage = (event) => {
+        txtReceive.value = event.data
+        console.log(event)
+    }
 }
 connection.onicecandidate = (iceEvent) => {
     console.log("onIceCandidate:", iceEvent)
@@ -37,7 +44,7 @@ connection.onicecandidate = (iceEvent) => {
 //     || remoteConnection.addIceCandidate(e.candidate)
 //         .catch(handleAddCandidateError);
 
-let channel
+
 const sendData = () => {
     channel.send("testing message")
 }
@@ -53,7 +60,6 @@ const initializeConnection = () => {
     channel.onopen = channelChangedCallback
     channel.onclose = channelChangedCallback
     channel.onmessage = (event) => {
-        trace("Received Message")
         txtReceive.value = event.data
     }
 
@@ -66,7 +72,6 @@ const initializeConnection = () => {
 
 btnStart.disabled = true
 btnClose.disabled = false
-
 
 socket.on("message", (message) => {
     console.log("Client received message:", message)
