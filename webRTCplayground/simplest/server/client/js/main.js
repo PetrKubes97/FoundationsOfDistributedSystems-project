@@ -36,7 +36,7 @@ const ROOT_OFFER = "root_offer"
 const NODE_OFFER = "node_offer"
 const ICE_OFFER = "root_ice_offer"
 
-const configuration = {iceServers: [{urls: 'stun:stun.l.google.com:19302'}]};
+const configuration = {iceServers: [{urls: "stun:stun.l.google.com:19302"}]}
 
 const connection = new RTCPeerConnection(configuration)
 
@@ -123,53 +123,72 @@ const handleDescriptionError = (e) => console.error(e)
 btnCreate.onclick = initializeConnection
 btnSend.onclick = sendData
 
-btnTop.onclick = () => {
-    if (isRoot) {
-        updateGameState(
-            {
-                ...gameState,
-                root: {
-                    ...gameState.root,
-                    y: gameState.root.y - 10
-                }
-            })
-    } else {
-        sendData(
-            {
-                ...gameState,
-                node: {
-                    ...gameState.node,
-                    y: gameState.node.y - 10
-                }
-            }
-        )
+const updateRoot = (data, gameState) => {
+    return {
+        ...gameState,
+        root: {
+            ...gameState.root,
+            ...data
+        }
     }
 }
 
-btnDown.onclick = () => {
-    if (isRoot) {
-        updateGameState(
-            {
-                ...gameState,
-                root: {
-                    ...gameState.root,
-                    y: gameState.root.y + 10
-                }
-            })
-    } else {
-        // TODO, send only the delta
-        sendData(
-            {
-                ...gameState,
-                node: {
-                    ...gameState.node,
-                    y: gameState.node.y + 10
-                }
-            }
-        )
+const updateNode = (data, gameState) => {
+    return {
+        ...gameState,
+        node: {
+            ...gameState.node,
+            ...data
+        }
     }
 }
 
+const goTop = () => {
+    if (isRoot) {
+        updateGameState(updateRoot({y: gameState.root.y - 10}, gameState))
+    } else {
+        sendData(updateNode({y: gameState.node.y - 10}, gameState))
+    }
+}
+
+const goDown = () => {
+    if (isRoot) {
+        updateGameState(updateRoot({y: gameState.root.y + 10}, gameState))
+    } else {
+        sendData(updateNode({y: gameState.node.y + 10}, gameState))
+    }
+}
+
+const goLeft = () => {
+    if (isRoot) {
+        updateGameState(updateRoot({x: gameState.root.x - 10}, gameState))
+    } else {
+        sendData(updateNode({x: gameState.node.x - 10}, gameState))
+    }
+}
+
+const goRight = () => {
+    if (isRoot) {
+        updateGameState(updateRoot({x: gameState.root.x + 10}, gameState))
+    } else {
+        sendData(updateNode({x: gameState.node.x + 10}, gameState))
+    }
+}
+
+btnTop.onclick = goTop
+btnDown.onclick = goDown
+
+document.addEventListener("keydown", (event) => {
+    if (event.key === "ArrowUp") {
+        goTop()
+    } else if (event.key === "ArrowDown") {
+        goDown()
+    } else if (event.key === "ArrowRight") {
+        goRight()
+    } else if (event.key === "ArrowLeft") {
+        goLeft()
+    }
+})
 
 const updateGameState = (newGameState) => {
     gameState = newGameState
