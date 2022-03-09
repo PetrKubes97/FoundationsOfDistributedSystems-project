@@ -36,8 +36,9 @@ const ROOT_OFFER = "root_offer"
 const NODE_OFFER = "node_offer"
 const ICE_OFFER = "root_ice_offer"
 
+const configuration = {iceServers: [{urls: 'stun:stun.l.google.com:19302'}]};
 
-const connection = new RTCPeerConnection()
+const connection = new RTCPeerConnection(configuration)
 
 
 /////
