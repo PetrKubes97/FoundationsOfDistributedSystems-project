@@ -1,13 +1,18 @@
 import { Container, Stage, Sprite, useTick } from '@inlet/react-pixi';
-import React, { useRef, useState, KeyboardEvent } from "react";
+import React, { useRef, useState, KeyboardEvent, useEffect } from "react";
 
 interface Props {
-  
-  }
 
-  
+}
+
+
+let lastRotation = 0
 const Ninja = () => {
   const image = './src/tank.png';
+
+  const tankWidth = 50;
+  const tankHeight = 50;
+
 
   const width = 500;
   const height = 500;
@@ -15,64 +20,101 @@ const Ninja = () => {
   const [rotate, updateRotate] = useState(0);
   const [scale, updateScale] = useState(1);
 
+  const [position, setPosition] = useState({x: 0, y: 0});
+
   const iter = useRef(0);
+
   useTick(delta => {
-    const i = (iter.current += 0.05 * delta)
-    updateRotate((Math.cos(i) * width) / 100);
-    updateScale(1 + Math.sin(i) * 0.5);
+    //const i = (iter.current += 0.05 * delta)
+    //updateRotate((Math.cos(i) * width) / 100);
+    //updateScale(1 + Math.sin(i) * 0.5);
+    
+    const newPositionX = Math.min(Math.max(0+tankWidth/2, position.x + direction.x), width-tankWidth/2)
+    const newPositionY = Math.min(Math.max(0+tankHeight/2, position.y + direction.y), height-tankHeight/2)
+
+    setPosition({x: newPositionX, y: newPositionY});
+    console.log(direction)
+  
+
   })
 
-  /*if (e.keyCode == '38') {
-        // up arrow
-    }
-    else if (e.keyCode == '40') {
-        // down arrow
-    }
-    else if (e.keyCode == '37') {
-       // left arrow
-    }
-    else if (e.keyCode == '39') {
-       // right arrow
-    } */
+  const [direction, setDirection] = useState({ x: 0, y: 0 });
 
+  useEffect(() => {
+    document.addEventListener('keydown', function (event) {
+      event.preventDefault();
     
-    return (
-   
-        <Container
-        rotation={rotate}
-        pivot={50}
-        position={[width / 2, height / 2]}
-        scale={scale}
-      >
-          <Sprite anchor={0.5} image={image} width={50} height={50} x={0} y={0} />
-          <Sprite anchor={0.5} image={image} width={50} height={50} x={50} y={50} />
-          <Sprite anchor={0.5} image={image} width={50} height={50} x={100} y={100} />    
-        </Container>
-      
-    );
+      switch (event.code) {
+        case "ArrowUp":
+          setDirection(direction => ({ ...direction, y: -1 }));
+          break;
+        case "ArrowDown":
+          setDirection(direction => ({ ...direction, y: 1 }));
+          break;
+        case "ArrowLeft":
+          setDirection(direction => ({ ...direction, x: -1 }));
+          break;
+        case "ArrowRight":
+          setDirection(direction => ({ ...direction, x: 1 }));
+          break;
+      }
+    })
+
+    document.addEventListener('keyup', function (event) {
+      switch (event.code) {
+        case "ArrowLeft":
+        case "ArrowDown":
+        case "ArrowRight":
+        case "ArrowUp":
+          setDirection({ x: 0, y: 0 });
+          break;
+      }
+    })
+  }, []);
+
+
+
+  let rotation = 0
+  if (direction.y == 0 && direction.x == 1) {
+    rotation = 0;
+  } else if (direction.y == 1 && direction.x == 1) {
+    rotation = 45;
+  } else if (direction.y == 1 && direction.x == 0) {
+    rotation = 90;
+  } else if (direction.y == 1 && direction.x == -1) {
+    rotation = 135;
+  } else if (direction.y == 0 && direction.x == -1) {
+    rotation = 180;
+  } else if (direction.y == -1 && direction.x == -1) {
+    rotation = 225;
+  } else if (direction.y == -1 && direction.x == 0) {
+    rotation = 270;
+  } else if (direction.y == -1 && direction.x == 1) {
+    rotation = 315;
+  } else if (direction.y == 0 && direction.x == 0) {
+    rotation = lastRotation
+  }
+  lastRotation = rotation
+  
+
+
+  return (
+  
+    <Sprite x={position.x} y={position.y} anchor={0.5} image={image} width={tankWidth} height={tankHeight} rotation={rotation*Math.PI/180}/>
+    
+  );
 };
 
-export const PixiComp3: React.FC<Props> = ({}) => {  
+export const PixiComp3: React.FC<Props> = ({ }) => {
 
-  const [top, setTop] = useState(0);
-  
-  const keyDownHandler = (event: React.KeyboardEvent<HTMLInputElement>) => {
-    if (event.code === "ArrowUp") {
-   
-    
-    console.log(event.code);
-    console.log('Wooho')
-    setTop((top) => top+10);
-    console.log(top)
-    }
-  };
-  
+
+
 
   return (
     <>
-    <Stage width={500} height={500} options={{ backgroundColor: 0x505152 }}>
-      <Ninja/>
-    </Stage>
+      <Stage width={500} height={500} options={{ backgroundColor: 0x505152 }}>
+        <Ninja />
+      </Stage>
     </>
   )
 }
