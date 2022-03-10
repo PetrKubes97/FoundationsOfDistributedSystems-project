@@ -34,9 +34,30 @@ const socket = io()
 
 const ROOT_OFFER = "root_offer"
 const NODE_OFFER = "node_offer"
-const ICE_OFFER = "root_ice_offer"
+const ICE_OFFER = "ice_offer"
 
-const configuration = {iceServers: [{urls: "stun:stun.l.google.com:19302"}]}
+const configuration = {
+    iceServers: [
+        {
+            urls: "stun:openrelay.metered.ca:80"
+        },
+        {
+            urls: "turn:openrelay.metered.ca:80",
+            username: "openrelayproject",
+            credential: "openrelayproject"
+        },
+        {
+            urls: "turn:openrelay.metered.ca:443",
+            username: "openrelayproject",
+            credential: "openrelayproject"
+        },
+        {
+            urls: "turn:openrelay.metered.ca:443?transport=tcp",
+            username: "openrelayproject",
+            credential: "openrelayproject"
+        }
+    ]
+}
 
 const connection = new RTCPeerConnection(configuration)
 
