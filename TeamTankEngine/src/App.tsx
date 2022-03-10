@@ -8,12 +8,16 @@ import PixiComp from './PixiShit'
 function App() {
   const [count, setCount] = useState(0)
 
+  
+
   return (
     <div className="App">
       <header className="App-header">
         
         <div>Hej</div>
         <PixiComp/>
+
+        
        
         <img src={logo} className="App-logo" alt="logo" />
         <p>Hello Vite + React!</p>
