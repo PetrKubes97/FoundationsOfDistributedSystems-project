@@ -33,9 +33,9 @@ const Ninja = () => {
       position={[width / 2, height / 2]}
       scale={scale}
     >
-        <Sprite anchor={0.5} image={image} x={0} y={0} />
-        <Sprite anchor={0.5} image={image} x={50} y={50} />
-        <Sprite anchor={0.5} image={image} x={100} y={100} />    
+        <Sprite anchor={0.5} image={image} width={50} height={50} x={0} y={0} />
+        <Sprite anchor={0.5} image={image} width={50} height={50} x={50} y={50} />
+        <Sprite anchor={0.5} image={image} width={50} height={50} x={100} y={100} />    
       </Container>
     );
 };
