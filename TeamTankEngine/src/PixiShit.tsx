@@ -1,41 +1,28 @@
-import { Container, Stage, Sprite, useTick } from '@inlet/react-pixi';
-import React, { useRef, useState, KeyboardEvent, useEffect } from "react";
+import { Stage, Sprite, useTick } from '@inlet/react-pixi';
+import React, { useState, useEffect } from "react";
 
 interface Props {
 
 }
 
+let width = 500;
+let height = 500;
 
 let lastRotation = 0
-const Ninja = () => {
+
+const Tank = () => {
   const image = './src/tank.png';
 
   const tankWidth = 50;
   const tankHeight = 50;
 
-
-  const width = 500;
-  const height = 500;
-
-  const [rotate, updateRotate] = useState(0);
-  const [scale, updateScale] = useState(1);
-
   const [position, setPosition] = useState({x: 0, y: 0});
 
-  const iter = useRef(0);
-
-  useTick(delta => {
-    //const i = (iter.current += 0.05 * delta)
-    //updateRotate((Math.cos(i) * width) / 100);
-    //updateScale(1 + Math.sin(i) * 0.5);
-    
+  useTick(() => {
     const newPositionX = Math.min(Math.max(0+tankWidth/2, position.x + direction.x), width-tankWidth/2)
     const newPositionY = Math.min(Math.max(0+tankHeight/2, position.y + direction.y), height-tankHeight/2)
 
     setPosition({x: newPositionX, y: newPositionY});
-    console.log(direction)
-  
-
   })
 
   const [direction, setDirection] = useState({ x: 0, y: 0 });
@@ -96,24 +83,17 @@ const Ninja = () => {
   }
   lastRotation = rotation
   
-
-
   return (
-  
     <Sprite x={position.x} y={position.y} anchor={0.5} image={image} width={tankWidth} height={tankHeight} rotation={rotation*Math.PI/180}/>
-    
   );
 };
 
 export const PixiComp3: React.FC<Props> = ({ }) => {
 
-
-
-
   return (
     <>
-      <Stage width={500} height={500} options={{ backgroundColor: 0x505152 }}>
-        <Ninja />
+      <Stage width={width} height={height} options={{ backgroundColor: 0x505152 }}>
+        <Tank/>
       </Stage>
     </>
   )
