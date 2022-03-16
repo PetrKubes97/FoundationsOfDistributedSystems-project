@@ -1,5 +1,6 @@
 import { Stage, Sprite, useTick } from '@inlet/react-pixi';
 import React, { useState, useEffect } from "react";
+import { Tank } from './Tank';
 
 interface Props {
 
@@ -8,15 +9,14 @@ interface Props {
 let width = 500;
 let height = 500;
 
-let lastRotation = 0
+let tankWidth = 50;
+let tankHeight = 50;
 
-const Tank = () => {
-  const image = './src/tank.png';
-
-  const tankWidth = 50;
-  const tankHeight = 50;
+const MyTank = () => {
+  const myTankImage = './src/tank.png';
 
   const [position, setPosition] = useState({x: 0, y: 0});
+  const [direction, setDirection] = useState({ x: 0, y: 0 });
 
   useTick(() => {
     const newPositionX = Math.min(Math.max(0+tankWidth/2, position.x + direction.x), width-tankWidth/2)
@@ -24,8 +24,6 @@ const Tank = () => {
 
     setPosition({x: newPositionX, y: newPositionY});
   })
-
-  const [direction, setDirection] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     document.addEventListener('keydown', function (event) {
@@ -59,44 +57,39 @@ const Tank = () => {
     })
   }, []);
 
-
-
-  let rotation = 0
-  if (direction.y == 0 && direction.x == 1) {
-    rotation = 0;
-  } else if (direction.y == 1 && direction.x == 1) {
-    rotation = 45;
-  } else if (direction.y == 1 && direction.x == 0) {
-    rotation = 90;
-  } else if (direction.y == 1 && direction.x == -1) {
-    rotation = 135;
-  } else if (direction.y == 0 && direction.x == -1) {
-    rotation = 180;
-  } else if (direction.y == -1 && direction.x == -1) {
-    rotation = 225;
-  } else if (direction.y == -1 && direction.x == 0) {
-    rotation = 270;
-  } else if (direction.y == -1 && direction.x == 1) {
-    rotation = 315;
-  } else if (direction.y == 0 && direction.x == 0) {
-    rotation = lastRotation
-  }
-  lastRotation = rotation
-  
   return (
-    <Sprite x={position.x} y={position.y} anchor={0.5} image={image} width={tankWidth} height={tankHeight} rotation={rotation*Math.PI/180}/>
+    <Tank position={position} direction={direction} tankWidth={tankWidth} tankHeight={tankHeight} image={myTankImage}/>
   );
 };
 
-export const PixiComp3: React.FC<Props> = ({ }) => {
+const OpponentTank = () => {
+  const opponentTankImage = './src/OpponentTank.png';
+
+  const position = {
+    x: 250,
+    y: 250
+  }
+  const direction = {
+    x: 0,
+    y: 0
+  }
+
+  return (
+    <Tank position={position} direction={direction} tankWidth={tankWidth} tankHeight={tankHeight} image={opponentTankImage}/>
+  );
+
+}
+
+export const TankGame: React.FC<Props> = ({ }) => {
 
   return (
     <>
       <Stage width={width} height={height} options={{ backgroundColor: 0x505152 }}>
-        <Tank/>
+        <MyTank/>
+        <OpponentTank/>
       </Stage>
     </>
   )
 }
 
-export default PixiComp3;
+export default TankGame;
