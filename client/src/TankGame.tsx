@@ -1,7 +1,8 @@
 import { Stage, useTick } from '@inlet/react-pixi';
 import React, { useState, useEffect } from 'react';
-import { Tank } from './components/TankComponent';
-import { coordinates, WallComponent } from './components/WallComponent';
+import { Tank } from './components/Tank';
+import { coordinates, WallComponent } from './components/Wall';
+import { GameState, TankState } from './models/GameState';
 
 interface Props {}
 
@@ -11,29 +12,30 @@ let height = 700;
 let tankWidth = 50;
 let tankHeight = 50;
 
-const MyTank = () => {
-  const myTankImage = './src/images/tank.png';
-
-  const [position, setPosition] = useState({ x: 0, y: 0 });
+const MyTank: React.FC = () => {
+  const [tankState, setTankState] = useState<TankState>({
+    pos: { x: 0, y: 0 },
+    dir: { x: 0, y: 0 },
+    color: 0x00ff00,
+  });
   const [oldPos, setOldPos] = useState({ x: 0, y: 0 });
-  const [direction, setDirection] = useState({ x: 0, y: 0 });
 
   useTick(() => {
     var newPositionX = Math.min(
-      Math.max(0 + tankWidth / 2, position.x + direction.x),
+      Math.max(0 + tankWidth / 2, tankState.pos.x + tankState.dir.x),
       width - tankWidth / 2
     );
     var newPositionY = Math.min(
-      Math.max(0 + tankHeight / 2, position.y + direction.y),
+      Math.max(0 + tankHeight / 2, tankState.pos.y + tankState.dir.y),
       height - tankHeight / 2
     );
 
     function checkCollision(x: number, y: number, w: number, h: number) {
       if (
-        position.x > x - w &&
-        position.x < x + w &&
-        position.y > y - h &&
-        position.y < y + h
+        tankState.pos.x > x - w &&
+        tankState.pos.x < x + w &&
+        tankState.pos.y > y - h &&
+        tankState.pos.y < y + h
       ) {
         return true;
       }
@@ -47,8 +49,11 @@ const MyTank = () => {
       }
     }
 
-    setOldPos({ x: position.x, y: position.y });
-    setPosition({ x: newPositionX, y: newPositionY });
+    setOldPos({ x: tankState.pos.x, y: tankState.pos.y });
+    setTankState((old) => ({
+      ...old,
+      pos: { x: newPositionX, y: newPositionY },
+    }));
   });
 
   useEffect(() => {
@@ -57,16 +62,16 @@ const MyTank = () => {
 
       switch (event.code) {
         case 'ArrowUp':
-          setDirection((direction) => ({ ...direction, y: -1 }));
+          setTankState((old) => ({ ...old, dir: { ...old.dir, y: -1 } }));
           break;
         case 'ArrowDown':
-          setDirection((direction) => ({ ...direction, y: 1 }));
+          setTankState((old) => ({ ...old, dir: { ...old.dir, y: 1 } }));
           break;
         case 'ArrowLeft':
-          setDirection((direction) => ({ ...direction, x: -1 }));
+          setTankState((old) => ({ ...old, dir: { ...old.dir, x: -1 } }));
           break;
         case 'ArrowRight':
-          setDirection((direction) => ({ ...direction, x: 1 }));
+          setTankState((old) => ({ ...old, dir: { ...old.dir, x: 1 } }));
           break;
       }
     });
@@ -77,26 +82,18 @@ const MyTank = () => {
         case 'ArrowDown':
         case 'ArrowRight':
         case 'ArrowUp':
-          setDirection({ x: 0, y: 0 });
+          setTankState((old) => ({ ...old, dir: { x: 0, y: 0 } }));
           break;
       }
     });
   }, []);
 
   return (
-    <Tank
-      position={position}
-      direction={direction}
-      tankWidth={tankWidth}
-      tankHeight={tankHeight}
-      image={myTankImage}
-    />
+    <Tank tankState={tankState} tankWidth={tankWidth} tankHeight={tankHeight} />
   );
 };
 
 const OpponentTank = () => {
-  const opponentTankImage = './src/images/OpponentTank.png';
-
   const position = {
     x: 400,
     y: 400,
@@ -109,16 +106,16 @@ const OpponentTank = () => {
 
   return (
     <Tank
-      position={position}
-      direction={direction}
+      tankState={{ pos: position, dir: direction, color: 0xff0000 }}
       tankWidth={tankWidth}
       tankHeight={tankHeight}
-      image={opponentTankImage}
     />
   );
 };
 
 export const TankGame: React.FC<Props> = ({}) => {
+  const [gameState, setGameState] = useState<GameState>();
+
   return (
     <>
       <Stage
