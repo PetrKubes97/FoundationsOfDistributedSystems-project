@@ -1,25 +1,27 @@
 import { Sprite } from '@inlet/react-pixi';
-import React from "react";
+
+import React from 'react';
 
 interface Props {
   position: {
-    x: number,
-    y: number,
-  },
+    x: number;
+    y: number;
+  };
   direction: {
-    x: number,
-    y: number,
-  },
-  tankWidth: number,
-  tankHeight: number,
-  image: string,
+    x: number;
+    y: number;
+  };
+  tankWidth: number;
+  tankHeight: number;
+  image: string;
 }
 
-let lastRotation = 0
+let lastRotation = 0;
 export const Tank: React.FC<Props> = (props) => {
-  const {direction, position, tankWidth, tankHeight, image} = props;
+  const { direction, position, tankWidth, tankHeight, image } = props;
 
-  let rotation = 0
+  let rotation = 0;
+
   if (direction.y == 0 && direction.x == 1) {
     rotation = 0;
   } else if (direction.y == 1 && direction.x == 1) {
@@ -37,15 +39,23 @@ export const Tank: React.FC<Props> = (props) => {
   } else if (direction.y == -1 && direction.x == 1) {
     rotation = 315;
   } else if (direction.y == 0 && direction.x == 0) {
-    rotation = lastRotation
+    rotation = lastRotation;
   }
-  lastRotation = rotation
+  lastRotation = rotation;
 
   return (
     <>
-        <Sprite x={position.x} y={position.y} anchor={0.5} image={image} width={tankWidth} height={tankHeight} rotation={rotation*Math.PI/180}/>
+      <Sprite
+        x={position.x}
+        y={position.y}
+        anchor={0.5}
+        image={image}
+        width={tankWidth}
+        height={tankHeight}
+        rotation={(rotation * Math.PI) / 180}
+      />
     </>
   );
-}
+};
 
-export default Tank; 
+export default Tank;
