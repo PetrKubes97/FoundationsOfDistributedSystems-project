@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+  <title>Realtime communication with WebRTC</title>
+  <link rel="stylesheet" href="css/main.css" />
+
+</head>
+
+<body>
+
+  <h1>Realtime communication with WebRTC</h1>
+
+  <textarea id="txtSend" disabled placeholder="Press Start, enter some text, then press Send."></textarea>
+  <textarea id="txtReceive" disabled></textarea>
+
+
+  <h4>Super basic game demo. The code is so ugly I dont want to add anything more</h4>
+  <ul>
+    <li>open two tabs</li>
+    <li>click create channel</li>
+    <li>click top or down</li>
+  </ul>
+
+  <div id="buttons">
+    <button id="btnCreate">Create channel</button>
+    <button id="btnSend">Send</button>
+    <button id="btnClose">Stop</button>
+  </div>
+
+  <div>
+    <button id="top">top</button>
+    <button id="down">down</button>
+  </div>
+
+  <canvas id="cnvsGame" width="300" height="300" style="margin-top: 20px"></canvas>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="https://webrtc.github.io/adapter/adapter-latest.js"></script>
+  <script src="js/main.js"></script>
+
+</body>
+
+</html>
