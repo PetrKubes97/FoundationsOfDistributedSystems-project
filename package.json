@@ -1,0 +1,26 @@
+{
+  "name": "tank-webrtc-game",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "dev": "concurrently npm:clientDev npm:serverDev -c bgRed.bold,bgBlue.bold",
+    "clientDev": "cd client && npm run dev",
+    "serverDev": "cd server && npm start",
+    "postinstall": "npm run install:client && npm run install:server",
+    "install:client": "cd client && npm install",
+    "install:server": "cd server && npm install"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/PetrKubes97/FoundationsOfDistributedSystems-project.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/PetrKubes97/FoundationsOfDistributedSystems-project/issues"
+  },
+  "homepage": "https://github.com/PetrKubes97/FoundationsOfDistributedSystems-project#readme",
+  "devDependencies": {
+    "concurrently": "^7.0.0"
+  }
+}
