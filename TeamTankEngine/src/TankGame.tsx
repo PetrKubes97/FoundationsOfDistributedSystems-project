@@ -2,6 +2,7 @@ import { Stage, useTick } from '@inlet/react-pixi';
 import React, { useState, useEffect } from 'react';
 import { Tank } from './components/TankComponent';
 import { coordinates, WallComponent } from './components/WallComponent';
+import { Bullet } from './components/BulletComponent';
 
 interface Props {}
 
@@ -11,12 +12,25 @@ let height = 700;
 let tankWidth = 50;
 let tankHeight = 50;
 
+const fireBullet = (position: {x: number, y: number}, direction: {x: number, y: number}) => {
+  
+  return (<Bullet startPosition={position} 
+    direction={direction}
+    bulletSize={12}
+    canvasHeight={height}
+    canvasWidth={width}/> )
+
+}
+
 const MyTank = () => {
   const myTankImage = './src/images/tank.png';
 
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [oldPos, setOldPos] = useState({ x: 0, y: 0 });
   const [direction, setDirection] = useState({ x: 0, y: 0 });
+  const [oldDir, setOldDir] = useState({ x: 0, y: 0 });
+
+  const [bulletFired, setBulletFired] = useState(false);
 
   useTick(() => {
     var newPositionX = Math.min(
@@ -68,10 +82,15 @@ const MyTank = () => {
         case 'ArrowRight':
           setDirection((direction) => ({ ...direction, x: 1 }));
           break;
+        case 'Space':
+          setBulletFired(true);
+          break;  
       }
+      setOldDir(direction);
     });
 
     document.addEventListener('keyup', function (event) {
+
       switch (event.code) {
         case 'ArrowLeft':
         case 'ArrowDown':
@@ -84,13 +103,16 @@ const MyTank = () => {
   }, []);
 
   return (
-    <Tank
-      position={position}
-      direction={direction}
-      tankWidth={tankWidth}
-      tankHeight={tankHeight}
-      image={myTankImage}
-    />
+    <>
+      <Tank
+        position={position}
+        direction={direction}
+        tankWidth={tankWidth}
+        tankHeight={tankHeight}
+        image={myTankImage}
+      />
+      {bulletFired ? fireBullet(position, direction) : null }
+    </>
   );
 };
 
