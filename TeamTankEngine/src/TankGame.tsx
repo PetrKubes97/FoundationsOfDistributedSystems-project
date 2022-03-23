@@ -15,7 +15,7 @@ let tankHeight = 50;
 const fireBullet = (position: {x: number, y: number}, direction: {x: number, y: number}) => {
   
   return (<Bullet startPosition={position} 
-    direction={direction}
+    direction={{x: 2,y:2}}
     bulletSize={12}
     canvasHeight={height}
     canvasWidth={width}/> )
