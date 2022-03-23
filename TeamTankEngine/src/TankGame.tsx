@@ -13,7 +13,6 @@ let tankWidth = 50;
 let tankHeight = 50;
 
 const fireBullet = (position: {x: number, y: number}, direction: {x: number, y: number}) => {
-  
   return (<Bullet startPosition={position} 
     direction={{x: 2,y:2}}
     bulletSize={12}
@@ -28,7 +27,6 @@ const MyTank = () => {
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [oldPos, setOldPos] = useState({ x: 0, y: 0 });
   const [direction, setDirection] = useState({ x: 0, y: 0 });
-  const [oldDir, setOldDir] = useState({ x: 0, y: 0 });
 
   const [bulletFired, setBulletFired] = useState(false);
 
@@ -86,7 +84,6 @@ const MyTank = () => {
           setBulletFired(true);
           break;  
       }
-      setOldDir(direction);
     });
 
     document.addEventListener('keyup', function (event) {
