@@ -15,5 +15,5 @@ export interface TankState {
 }
 
 export interface GameState {
-  tankStates: TankState[];
+  tankState: TankState;
 }
