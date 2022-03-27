@@ -1,5 +1,6 @@
 import { Stage } from '@inlet/react-pixi';
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
+import useState from 'react-usestateref'
 import { io, Socket } from 'socket.io-client';
 import { Menu } from './components/Menu';
 import Tank from './components/Tank';
@@ -49,7 +50,7 @@ export const TankGame: React.FC<Props> = ({}) => {
   const [isRoot, setIsRoot] = useState<boolean>(false);
   const [connected, setConnected] = useState<boolean>(false);
   const [gameState, setGameState] = useState<GameState>();
-  const [connectionObjects, setConnectionObjects] =
+  const [connectionObjects, setConnectionObjects, connectionObjectsRef] =
     useState<ConnectionObjects | undefined>(undefined);
 
 
@@ -61,14 +62,16 @@ export const TankGame: React.FC<Props> = ({}) => {
 
   const sendSocketIOMessage = (channel: string, message: any) => {
     console.log('sendSocketIOMessage', channel, message);
-    connectionObjects?.socket.emit('message', { channel, message });
+    const conn = connectionObjectsRef.current!
+    conn.socket.emit('message', { channel, message });
   };
 
   const sendWebRTCData = (data: any) => {
     const stringified = JSON.stringify(data);
-    console.log(connectionObjects?.channel?.readyState)
-    if (connectionObjects?.channel?.readyState == 'open') {
-      connectionObjects?.channel?.send(stringified);
+    const conn = connectionObjectsRef.current!
+    console.log(conn.channel?.readyState)
+    if (conn?.channel?.readyState == 'open') {
+      conn?.channel?.send(stringified);
     }
   };
 

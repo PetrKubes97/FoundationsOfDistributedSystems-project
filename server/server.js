@@ -12,10 +12,10 @@ const io = new Server(server, {
 });
 
 io.on('connection', (socket) => {
-  // console.log('a user connected');
+  console.log('a user connected');
 
   socket.on('message', ({ channel, message }) => {
-    console.log('broadcasting: ', message);
+    console.log('broadcasting: ', channel, message);
     socket.broadcast.emit(channel, message);
   });
 
