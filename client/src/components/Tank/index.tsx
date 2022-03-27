@@ -37,11 +37,11 @@ export const Tank: React.FC<Props> = ({ tankState, setTankState }) => {
         )
       ) {
         const newPositionX = Math.min(
-          Math.max(0 + TANK_WIDTH / 2, tankState.pos.x + tankState.dir.x),
+          Math.max(TANK_WIDTH / 2, tankState.pos.x + tankState.dir.x),
           FIELD_WIDTH - TANK_WIDTH / 2
         );
         const newPositionY = Math.min(
-          Math.max(0 + TANK_HEIGHT / 2, tankState.pos.y + tankState.dir.y),
+          Math.max(TANK_HEIGHT / 2, tankState.pos.y + tankState.dir.y),
           FIELD_HEIGHT - TANK_HEIGHT / 2
         );
 

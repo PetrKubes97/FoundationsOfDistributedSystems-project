@@ -6,7 +6,8 @@ import Tank from './components/Tank';
 import { WallComponent } from './components/Wall';
 import { Direction, GameState, TankState } from './models/GameState';
 
-interface Props {}
+interface Props {
+}
 
 const width = 700;
 const height = 700;
@@ -38,46 +39,65 @@ const configuration = {
   ],
 };
 
+interface ConnectionObjects {
+  socket: Socket;
+  connection: RTCPeerConnection;
+  channel?: RTCDataChannel;
+}
+
 export const TankGame: React.FC<Props> = ({}) => {
   const [isRoot, setIsRoot] = useState<boolean>(false);
   const [connected, setConnected] = useState<boolean>(false);
   const [gameState, setGameState] = useState<GameState>();
-  var socket: Socket;
-  var connection: RTCPeerConnection;
-  var channel: RTCDataChannel;
+  const [connectionObjects, setConnectionObjects] =
+    useState<ConnectionObjects | undefined>(undefined);
+
+
   const [currentTankState, setCurrentTankState] = useState<TankState>({
     color: 0x00ff00,
     dir: { x: 0, y: 0 },
     pos: { x: 100, y: 100 },
   });
 
-  const sendMessage = (channel: string, message: any) => {
-    console.log('sendMessage', channel, message);
-    socket.emit('message', { channel, message });
+  const sendSocketIOMessage = (channel: string, message: any) => {
+    console.log('sendSocketIOMessage', channel, message);
+    connectionObjects?.socket.emit('message', { channel, message });
   };
 
-  const sendData = (data: any) => {
+  const sendWebRTCData = (data: any) => {
     const stringified = JSON.stringify(data);
-    console.log(channel);
-    channel?.send(stringified);
+    console.log(connectionObjects?.channel?.readyState)
+    if (connectionObjects?.channel?.readyState == 'open') {
+      connectionObjects?.channel?.send(stringified);
+    }
+  };
+
+  const listenToChannel = (channel: RTCDataChannel) => {
+    channel.onmessage = (event) => {
+      const parsed: GameState = JSON.parse(event.data);
+      console.log('On data channel', parsed);
+      setGameState(parsed);
+    };
   };
 
   useEffect(() => {
-    if (!socket) socket = io('ws://localhost:4000');
-    if (!connection) connection = new RTCPeerConnection(configuration);
+    const socket = io('ws://localhost:4000');
+    const connection = new RTCPeerConnection(configuration);
+    setConnectionObjects({
+      socket, connection, channel: undefined,
+    });
 
     connection.ondatachannel = (channelEvent) => {
-      const ch = channelEvent.channel;
-      ch.onmessage = (event) => {
-        const parsed: GameState = JSON.parse(event.data);
-        setGameState(parsed);
-      };
+      console.log('ondatachannel', channelEvent);
+      const channel = channelEvent.channel;
+      setConnectionObjects({ ...connectionObjects!, channel });
+      listenToChannel(channel);
     };
 
     connection.onicecandidate = (iceEvent) => {
       console.log('On ice');
       if (iceEvent.candidate) {
-        sendMessage(ICE_OFFER, {
+        sendSocketIOMessage(ICE_OFFER, {
           label: iceEvent.candidate.sdpMLineIndex,
           id: iceEvent.candidate.sdpMid,
           candidate: iceEvent.candidate.candidate,
@@ -85,17 +105,13 @@ export const TankGame: React.FC<Props> = ({}) => {
       }
     };
 
-    socket.on('message', (message) => {
-      console.log('Client received message:', message);
-    });
-
     socket.on(ROOT_OFFER, (message) => {
       console.log('Client received ROOT_OFFER:', message);
       connection
         .setRemoteDescription(message)
         .then(() => connection.createAnswer())
         .then((answer) => connection.setLocalDescription(answer))
-        .then(() => sendMessage(NODE_OFFER, connection.localDescription))
+        .then(() => sendSocketIOMessage(NODE_OFFER, connection.localDescription))
         .then(() => setConnected(true))
         .catch((err) => console.error(err));
     });
@@ -116,31 +132,38 @@ export const TankGame: React.FC<Props> = ({}) => {
 
   const initGame = () => {
     setIsRoot(true);
-    socket = io('ws://localhost:4000');
-    connection = new RTCPeerConnection(configuration);
-
-    channel = connection.createDataChannel('sendDataChannel', undefined);
-    console.error(channel);
-
-    channel.onmessage = (event) => {
-      const parsed: GameState = JSON.parse(event.data);
-      setGameState(parsed);
-    };
+    const connection = connectionObjects!.connection;
+    const channel = connection.createDataChannel('sendDataChannel', {});
+    setConnectionObjects({ ...connectionObjects!, channel });
+    listenToChannel(channel);
 
     connection
       .createOffer()
       .then((offer) => connection.setLocalDescription(offer))
-      .then(() => sendMessage(ROOT_OFFER, connection.localDescription))
+      .then(() => sendSocketIOMessage(ROOT_OFFER, connection.localDescription))
       .catch((err) => console.error(err));
     setConnected(true);
 
-    // Add tank to game state
+    channel.onopen = (event) => {
+      console.log(event)
+    }
+
+     channel.onerror = (event) => {
+      console.log(event)
+    }
+
+    channel.onclose = (event) => {
+      console.log(event)
+    }
+
+    //
+    // // Add tank to game state
     setGameState({ tankState: currentTankState });
-    sendData(gameState);
+    // sendWebRTCData(gameState);
   };
 
   useEffect(() => {
-    document.addEventListener('keydown', function (event) {
+    document.addEventListener('keydown', function(event) {
       event.preventDefault();
 
       let dir: Direction = currentTankState.dir;
@@ -161,7 +184,7 @@ export const TankGame: React.FC<Props> = ({}) => {
       setCurrentTankState((ts) => ({ ...ts, dir }));
     });
 
-    document.addEventListener('keyup', function (event) {
+    document.addEventListener('keyup', function(event) {
       switch (event.code) {
         case 'ArrowLeft':
         case 'ArrowDown':
@@ -175,7 +198,9 @@ export const TankGame: React.FC<Props> = ({}) => {
 
   useEffect(() => {
     setGameState({ tankState: currentTankState });
-    sendData(gameState);
+    if (isRoot) {
+      sendWebRTCData(gameState);
+    }
   }, [currentTankState]);
 
   return (
