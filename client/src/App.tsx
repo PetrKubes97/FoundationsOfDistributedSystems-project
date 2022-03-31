@@ -1,13 +1,21 @@
-import './App.css';
+import './App.css'
 
-import React from 'react';
-import TankGame from './TankGame';
+import React, { useState } from 'react'
+import TankGame from './TankGame'
+import { Menu } from './components/menu/Menu'
 
 const App: React.FC = () => {
+  const [roomId, setRoomId] = useState<string | undefined>()
+
+  const createRoom = () => {}
+
+  const joinRoom = (roomId: string) => {}
+
   return (
     <div className="App">
       <header className="App-header">
-        <TankGame />
+        {roomId && <TankGame />}
+        {!roomId && <Menu createRoom={createRoom} joinRoom={joinRoom} />}
 
         <a
           className="App-link"
@@ -19,7 +27,7 @@ const App: React.FC = () => {
         </a>
       </header>
     </div>
-  );
-};
+  )
+}
 
-export default App;
+export default App

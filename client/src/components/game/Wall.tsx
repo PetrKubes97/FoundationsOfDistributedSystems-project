@@ -1,12 +1,12 @@
-import { Container, Sprite } from '@inlet/react-pixi';
-import React, { useState } from 'react';
+import { Container, Sprite } from '@inlet/react-pixi'
+import React, { useState } from 'react'
 
 interface Props {}
 
 const Wall = () => {
-  const image = './src/images/wall.jpg';
-  const wallWidth = 50;
-  const wallHeight = 50;
+  const image = './src/images/wall.jpg'
+  const wallWidth = 50
+  const wallHeight = 50
 
   return (
     <Container>
@@ -187,12 +187,12 @@ const Wall = () => {
         height={wallHeight}
       />
     </Container>
-  );
-};
+  )
+}
 
 export const WallComponent: React.FC<Props> = ({}) => {
-  return <Wall />;
-};
+  return <Wall />
+}
 
 export const coordinates: any = [
   { x: 175, y: 25 },
@@ -216,4 +216,13 @@ export const coordinates: any = [
   { x: 525, y: 675 },
   { x: 525, y: 625 },
   { x: 525, y: 575 },
-];
+]
+
+const mazeMap = [
+  [0, 1, 0, 0, 0, 0, 1, 1, 0],
+  [0, 1, 0, 0, 0, 0, 0, 0, 0],
+  [0, 1, 0, 0, 1, 1, 1, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0],
+  [1, 1, 1, 0, 0, 0, 1, 0, 0],
+  [0, 0, 0, 0, 0, 0, 1, 0, 0],
+]

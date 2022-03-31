@@ -21,6 +21,7 @@
   },
   "homepage": "https://github.com/PetrKubes97/FoundationsOfDistributedSystems-project#readme",
   "devDependencies": {
-    "concurrently": "^7.0.0"
+    "concurrently": "^7.0.0",
+    "prettier": "2.6.1"
   }
 }
