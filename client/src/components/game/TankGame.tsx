@@ -8,8 +8,8 @@ import {
   Direction,
   GameState,
   TankState,
+  UserAction,
 } from '../../models/GameState'
-import { Menu } from '../menu/Menu'
 import Tank from './canvas-elements/Tank'
 import { Wall } from './canvas-elements/Wall'
 import { GameScreenControls } from './GameScreenControls'
@@ -78,10 +78,19 @@ const defaultTankState = {
   pos: { x: 100, y: 100 },
 }
 
-export const TankGame: React.FC = () => {
+type props = {
+  gameState: GameState
+  setUserAction: (action: UserAction) => void
+}
+
+export const TankGame: React.FC<props> = ({ gameState, setUserAction }) => {
+  // TODO: This one will be super simple
+  // it will only a) display the game state it gets
+  // b) notify about player actions
+
   const [isRoot, setIsRoot] = useState<boolean>(false)
   const [connected, setConnected] = useState<boolean>(false)
-  const [gameState, setGameState] = useState<GameState>({
+  const [gameStateTODO, setGameStateTODO] = useState<GameState>({
     wallCoordinates: coordinates,
     tankState: defaultTankState,
   })
@@ -107,7 +116,7 @@ export const TankGame: React.FC = () => {
     channel.onmessage = (event) => {
       const parsed: GameState = JSON.parse(event.data)
       console.log('On data channel', parsed)
-      setGameState(parsed)
+      setGameStateTODO(parsed)
     }
   }
 
@@ -196,15 +205,18 @@ export const TankGame: React.FC = () => {
     }
 
     // Add tank to game state
-    setGameState({ tankState: defaultTankState, wallCoordinates: coordinates })
-    // sendWebRTCData(gameState);
+    setGameStateTODO({
+      tankState: defaultTankState,
+      wallCoordinates: coordinates,
+    })
+    // sendWebRTCData(gameStateTODO);
   }
 
   useEffect(() => {
     const keyDownListener = (event: KeyboardEvent) => {
       event.preventDefault()
 
-      let dir: Direction = gameState?.tankState.dir
+      let dir: Direction = gameStateTODO?.tankState.dir
       switch (event.code) {
         case 'ArrowUp':
           dir = { ...dir, y: -1 }
@@ -219,7 +231,7 @@ export const TankGame: React.FC = () => {
           dir = { ...dir, x: 1 }
           break
       }
-      setGameState((old) => ({
+      setGameStateTODO((old) => ({
         ...old,
         tankState: { ...old.tankState, dir },
       }))
@@ -231,7 +243,7 @@ export const TankGame: React.FC = () => {
         case 'ArrowDown':
         case 'ArrowRight':
         case 'ArrowUp':
-          setGameState((old) => ({
+          setGameStateTODO((old) => ({
             ...old,
             tankState: { ...old.tankState, dir: { x: 0, y: 0 } },
           }))
@@ -249,7 +261,7 @@ export const TankGame: React.FC = () => {
   }, [])
 
   const setTankState = (updateTankState: (ts: TankState) => TankState) => {
-    setGameState((old) => ({
+    setGameStateTODO((old) => ({
       ...old,
       tankState: updateTankState(old.tankState),
     }))
@@ -265,11 +277,11 @@ export const TankGame: React.FC = () => {
           options={{ backgroundColor: 0x505152 }}
         >
           <Tank
-            tankState={gameState?.tankState}
+            tankState={gameStateTODO?.tankState}
             setTankState={setTankState}
-            wallCoordinate={gameState?.wallCoordinates}
+            wallCoordinate={gameStateTODO?.wallCoordinates}
           />
-          <Wall coordinates={gameState?.wallCoordinates} />
+          <Wall coordinates={gameStateTODO?.wallCoordinates} />
         </Stage>
       )}
     </>

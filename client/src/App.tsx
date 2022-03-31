@@ -1,9 +1,9 @@
 import './App.css'
-import { BrowserRouter, useSearchParams } from 'react-router-dom'
+import { useSearchParams } from 'react-router-dom'
 
 import React from 'react'
-import TankGame from './components/game/TankGame'
 import { Menu } from './components/menu/Menu'
+import { RoomConnectionProvider } from './components/game/RoomConnectionProvider'
 
 const App: React.FC = () => {
   const [searchParams] = useSearchParams()
@@ -12,7 +12,7 @@ const App: React.FC = () => {
   return (
     <div className="App">
       <header className="App-header">
-        {roomId && <TankGame />}
+        {roomId && <RoomConnectionProvider roomId={roomId} />}
         {!roomId && <Menu />}
 
         <a
