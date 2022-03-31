@@ -1,17 +1,17 @@
 import { Stage } from '@inlet/react-pixi';
 import React, { useEffect } from 'react';
-import useState from 'react-usestateref'
+import useState from 'react-usestateref';
 import { io, Socket } from 'socket.io-client';
 import { Menu } from './components/Menu';
 import Tank from './components/Tank';
-import { WallComponent } from './components/Wall';
-import { Direction, GameState, TankState } from './models/GameState';
-
-interface Props {
-}
-
-const width = 700;
-const height = 700;
+import { Wall } from './components/Wall';
+import { FIELD_HEIGHT, FIELD_WIDTH } from './config';
+import {
+  Coordinate,
+  Direction,
+  GameState,
+  TankState,
+} from './models/GameState';
 
 const ROOT_OFFER = 'root_offer';
 const NODE_OFFER = 'node_offer';
@@ -46,30 +46,57 @@ interface ConnectionObjects {
   channel?: RTCDataChannel;
 }
 
-export const TankGame: React.FC<Props> = ({}) => {
+export const coordinates: Coordinate[] = [
+  { x: 175, y: 25 },
+  { x: 175, y: 75 },
+  { x: 175, y: 125 },
+  { x: 25, y: 275 },
+  { x: 75, y: 275 },
+  { x: 125, y: 275 },
+  { x: 175, y: 275 },
+  { x: 225, y: 275 },
+  { x: 275, y: 275 },
+  { x: 425, y: 275 },
+  { x: 475, y: 275 },
+  { x: 525, y: 275 },
+  { x: 575, y: 275 },
+  { x: 625, y: 275 },
+  { x: 675, y: 275 },
+  { x: 275, y: 375 },
+  { x: 275, y: 425 },
+  { x: 275, y: 475 },
+  { x: 525, y: 675 },
+  { x: 525, y: 625 },
+  { x: 525, y: 575 },
+  { x: 275, y: 325 },
+];
+
+const defaultTankState = {
+  color: 0x00ff00,
+  dir: { x: 0, y: 0 },
+  pos: { x: 100, y: 100 },
+};
+
+export const TankGame: React.FC = () => {
   const [isRoot, setIsRoot] = useState<boolean>(false);
   const [connected, setConnected] = useState<boolean>(false);
-  const [gameState, setGameState] = useState<GameState>();
+  const [gameState, setGameState] = useState<GameState>({
+    wallCoordinates: coordinates,
+    tankState: defaultTankState,
+  });
   const [connectionObjects, setConnectionObjects, connectionObjectsRef] =
     useState<ConnectionObjects | undefined>(undefined);
 
-
-  const [currentTankState, setCurrentTankState] = useState<TankState>({
-    color: 0x00ff00,
-    dir: { x: 0, y: 0 },
-    pos: { x: 100, y: 100 },
-  });
-
   const sendSocketIOMessage = (channel: string, message: any) => {
     console.log('sendSocketIOMessage', channel, message);
-    const conn = connectionObjectsRef.current!
+    const conn = connectionObjectsRef.current!;
     conn.socket.emit('message', { channel, message });
   };
 
   const sendWebRTCData = (data: any) => {
     const stringified = JSON.stringify(data);
-    const conn = connectionObjectsRef.current!
-    console.log(conn.channel?.readyState)
+    const conn = connectionObjectsRef.current!;
+    console.log(conn.channel?.readyState);
     if (conn?.channel?.readyState == 'open') {
       conn?.channel?.send(stringified);
     }
@@ -87,7 +114,9 @@ export const TankGame: React.FC<Props> = ({}) => {
     const socket = io('ws://localhost:4000');
     const connection = new RTCPeerConnection(configuration);
     setConnectionObjects({
-      socket, connection, channel: undefined,
+      socket,
+      connection,
+      channel: undefined,
     });
 
     connection.ondatachannel = (channelEvent) => {
@@ -114,7 +143,9 @@ export const TankGame: React.FC<Props> = ({}) => {
         .setRemoteDescription(message)
         .then(() => connection.createAnswer())
         .then((answer) => connection.setLocalDescription(answer))
-        .then(() => sendSocketIOMessage(NODE_OFFER, connection.localDescription))
+        .then(() =>
+          sendSocketIOMessage(NODE_OFFER, connection.localDescription)
+        )
         .then(() => setConnected(true))
         .catch((err) => console.error(err));
     });
@@ -148,28 +179,27 @@ export const TankGame: React.FC<Props> = ({}) => {
     setConnected(true);
 
     channel.onopen = (event) => {
-      console.log(event)
-    }
+      console.log(event);
+    };
 
-     channel.onerror = (event) => {
-      console.log(event)
-    }
+    channel.onerror = (event) => {
+      console.log(event);
+    };
 
     channel.onclose = (event) => {
-      console.log(event)
-    }
+      console.log(event);
+    };
 
-    //
-    // // Add tank to game state
-    setGameState({ tankState: currentTankState });
+    // Add tank to game state
+    setGameState({ tankState: defaultTankState, wallCoordinates: coordinates });
     // sendWebRTCData(gameState);
   };
 
   useEffect(() => {
-    document.addEventListener('keydown', function(event) {
+    document.addEventListener('keydown', function (event) {
       event.preventDefault();
 
-      let dir: Direction = currentTankState.dir;
+      let dir: Direction = gameState?.tankState.dir;
       switch (event.code) {
         case 'ArrowUp':
           dir = { ...dir, y: -1 };
@@ -184,42 +214,49 @@ export const TankGame: React.FC<Props> = ({}) => {
           dir = { ...dir, x: 1 };
           break;
       }
-      setCurrentTankState((ts) => ({ ...ts, dir }));
+      setGameState((old) => ({
+        ...old,
+        tankState: { ...old.tankState, dir },
+      }));
     });
 
-    document.addEventListener('keyup', function(event) {
+    document.addEventListener('keyup', function (event) {
       switch (event.code) {
         case 'ArrowLeft':
         case 'ArrowDown':
         case 'ArrowRight':
         case 'ArrowUp':
-          setCurrentTankState((ts) => ({ ...ts, dir: { x: 0, y: 0 } }));
+          setGameState((old) => ({
+            ...old,
+            tankState: { ...old.tankState, dir: { x: 0, y: 0 } },
+          }));
           break;
       }
     });
   }, []);
 
-  useEffect(() => {
-    setGameState({ tankState: currentTankState });
-    if (isRoot) {
-      sendWebRTCData(gameState);
-    }
-  }, [currentTankState]);
+  const setTankState = (updateTankState: (ts: TankState) => TankState) => {
+    setGameState((old) => ({
+      ...old,
+      tankState: updateTankState(old.tankState),
+    }));
+  };
 
   return (
     <>
       <Menu initGame={initGame} isRoot={isRoot} connected={connected} />
       {connected && (
         <Stage
-          width={width}
-          height={height}
+          width={FIELD_WIDTH}
+          height={FIELD_HEIGHT}
           options={{ backgroundColor: 0x505152 }}
         >
           <Tank
-            tankState={currentTankState}
-            setTankState={setCurrentTankState}
+            tankState={gameState?.tankState}
+            setTankState={setTankState}
+            wallCoordinate={gameState?.wallCoordinates}
           />
-          <WallComponent />
+          <Wall coordinates={gameState?.wallCoordinates} />
         </Stage>
       )}
     </>
