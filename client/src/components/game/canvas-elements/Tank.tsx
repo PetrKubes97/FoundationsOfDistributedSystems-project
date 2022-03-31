@@ -1,19 +1,20 @@
 import React, { useEffect, useState } from 'react'
 import { Sprite, useTick } from '@inlet/react-pixi'
+
+import TankImage from '../tank.png'
+import { Coordinate, TankState } from '../../../models/GameState'
+import { checkCollision, determineRotation } from '../../../helpers/tank'
 import {
   FIELD_HEIGHT,
   FIELD_WIDTH,
   TANK_HEIGHT,
   TANK_WIDTH,
-} from '../../config';
-import { checkCollision, determineRotation } from '../../helpers/tank';
-import { Coordinate, TankState } from '../../models/GameState';
-import TankImage from './tank.png';
+} from '../../../config'
 
 interface Props {
-  tankState: TankState | undefined;
-  setTankState: (fn: (ts: TankState) => TankState) => void;
-  wallCoordinate: Coordinate[] | undefined;
+  tankState: TankState | undefined
+  setTankState: (fn: (ts: TankState) => TankState) => void
+  wallCoordinate: Coordinate[] | undefined
 }
 
 export const Tank: React.FC<Props> = ({
@@ -27,20 +28,20 @@ export const Tank: React.FC<Props> = ({
     if (tankState) {
       setRotation((old) =>
         determineRotation(tankState.dir.x, tankState.dir.y, old)
-      );
+      )
     }
-  }, [tankState]);
+  }, [tankState])
 
   useTick(() => {
     if (tankState && wallCoordinates) {
-      const oldPosX = tankState.pos.x;
-      const oldPosY = tankState.pos.y;
+      const oldPosX = tankState.pos.x
+      const oldPosY = tankState.pos.y
 
-      var newPositionX = Math.min(
-        Math.max(0 + TANK_WIDTH / 2, tankState.pos.x + tankState.dir.x),
+      let newPositionX = Math.min(
+        Math.max(TANK_WIDTH / 2, tankState.pos.x + tankState.dir.x),
         FIELD_WIDTH - TANK_WIDTH / 2
       )
-      var newPositionY = Math.min(
+      let newPositionY = Math.min(
         Math.max(0 + TANK_HEIGHT / 2, tankState.pos.y + tankState.dir.y),
         FIELD_HEIGHT - TANK_HEIGHT / 2
       )
@@ -56,14 +57,14 @@ export const Tank: React.FC<Props> = ({
             TANK_HEIGHT
           )
         ) {
-          newPositionX = oldPosX;
-          newPositionY = oldPosY;
+          newPositionX = oldPosX
+          newPositionY = oldPosY
         }
       }
       setTankState((old) => ({
         ...old,
         pos: { x: newPositionX, y: newPositionY },
-      }));
+      }))
     }
   })
 

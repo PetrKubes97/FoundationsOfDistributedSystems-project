@@ -1,6 +1,6 @@
 import React from 'react'
 import { Container, Sprite } from '@inlet/react-pixi'
-import { Coordinate } from '../models/GameState'
+import { Coordinate } from '../../../models/GameState'
 
 interface Props {
   coordinates: Coordinate[] | undefined

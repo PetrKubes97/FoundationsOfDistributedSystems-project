@@ -1,23 +1,22 @@
 import './App.css'
+import { BrowserRouter, useSearchParams } from 'react-router-dom'
 
-import React, { useState } from 'react'
-import TankGame from './TankGame'
+import React from 'react'
+import TankGame from './components/game/TankGame'
 import { Menu } from './components/menu/Menu'
 
 const App: React.FC = () => {
-  const [roomId, setRoomId] = useState<string | undefined>()
-
-  const createRoom = () => {}
-
-  const joinRoom = (roomId: string) => {}
+  const [searchParams] = useSearchParams()
+  const roomId = searchParams.get('roomId')
 
   return (
     <div className="App">
       <header className="App-header">
         {roomId && <TankGame />}
-        {!roomId && <Menu createRoom={createRoom} joinRoom={joinRoom} />}
+        {!roomId && <Menu />}
 
         <a
+          style={{ marginTop: '32px' }}
           className="App-link"
           href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
           target="_blank"

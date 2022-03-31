@@ -1,25 +1,42 @@
 import React, { useState } from 'react'
 import GreenTank from '../../images/tank.png'
 import OrangeTank from '../../images/OpponentTank.png'
+import { useSearchParams } from 'react-router-dom'
 
-interface Props {
-  createRoom: () => void
-  joinRoom: (id: string) => void
-}
-
-export const Menu: React.FC<Props> = ({ createRoom, joinRoom }) => {
+export const Menu: React.FC = (props) => {
   const [roomToJoinId, setRoomToJoinId] = useState<string>('')
+  const [, setSearchParams] = useSearchParams()
+
+  const generateRandomString = (len: number) => {
+    return (Math.random() + 1).toString(36).substring(len)
+  }
+
+  const goToRoom = (roomId: string) => {
+    setSearchParams({ roomId })
+  }
 
   return (
     <div id={'menuContainer'}>
       <p>The Great Game of Tanks</p>
-      <button onClick={createRoom}>Create room</button>
+      <button onClick={() => goToRoom(generateRandomString(6))}>
+        Create room
+      </button>
       <div id={'joinRoomContainer'}>
-        <button onClick={() => joinRoom(roomToJoinId)}> Join room</button>
+        <button
+          disabled={roomToJoinId.length !== 6}
+          onClick={() => goToRoom(roomToJoinId)}
+        >
+          {' '}
+          Join room
+        </button>
         <input
+          placeholder={'room id'}
           type={'text'}
           value={roomToJoinId}
-          onChange={(e) => setRoomToJoinId(e.target.value)}
+          onChange={(e) => {
+            console.log('asdf')
+            setRoomToJoinId(e.target.value)
+          }}
         />
       </div>
     </div>

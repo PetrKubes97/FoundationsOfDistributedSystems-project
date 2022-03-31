@@ -1,17 +1,18 @@
-import { Stage } from '@inlet/react-pixi';
-import React, { useEffect } from 'react';
-import useState from 'react-usestateref';
-import { io, Socket } from 'socket.io-client';
-import { Menu } from './components/Menu';
-import Tank from './components/Tank';
-import { Wall } from './components/Wall';
-import { FIELD_HEIGHT, FIELD_WIDTH } from './config';
+import { Stage } from '@inlet/react-pixi'
+import React, { useEffect } from 'react'
+import useState from 'react-usestateref'
+import { io, Socket } from 'socket.io-client'
+import { FIELD_HEIGHT, FIELD_WIDTH } from '../../config'
 import {
   Coordinate,
   Direction,
   GameState,
   TankState,
-} from './models/GameState';
+} from '../../models/GameState'
+import { Menu } from '../menu/Menu'
+import Tank from './canvas-elements/Tank'
+import { Wall } from './canvas-elements/Wall'
+import { GameScreenControls } from './GameScreenControls'
 
 const ROOT_OFFER = 'root_offer'
 const NODE_OFFER = 'node_offer'
@@ -69,13 +70,13 @@ export const coordinates: Coordinate[] = [
   { x: 525, y: 625 },
   { x: 525, y: 575 },
   { x: 275, y: 325 },
-];
+]
 
 const defaultTankState = {
   color: 0x00ff00,
   dir: { x: 0, y: 0 },
   pos: { x: 100, y: 100 },
-};
+}
 
 export const TankGame: React.FC = () => {
   const [isRoot, setIsRoot] = useState<boolean>(false)
@@ -85,18 +86,18 @@ export const TankGame: React.FC = () => {
     tankState: defaultTankState,
   })
   const [connectionObjects, setConnectionObjects, connectionObjectsRef] =
-    useState<ConnectionObjects | undefined>(undefined);
+    useState<ConnectionObjects | undefined>(undefined)
 
   const sendSocketIOMessage = (channel: string, message: any) => {
     console.log('sendSocketIOMessage', channel, message)
-    const conn = connectionObjectsRef.current!;
+    const conn = connectionObjectsRef.current!
     conn.socket.emit('message', { channel, message })
   }
 
   const sendWebRTCData = (data: any) => {
     const stringified = JSON.stringify(data)
-    const conn = connectionObjectsRef.current!;
-    console.log(conn.channel?.readyState);
+    const conn = connectionObjectsRef.current!
+    console.log(conn.channel?.readyState)
     if (conn?.channel?.readyState == 'open') {
       conn?.channel?.send(stringified)
     }
@@ -162,6 +163,10 @@ export const TankGame: React.FC = () => {
       })
       connection.addIceCandidate(candidate)
     })
+
+    return () => {
+      connection.close()
+    }
   }, [])
 
   const initGame = () => {
@@ -179,16 +184,16 @@ export const TankGame: React.FC = () => {
     setConnected(true)
 
     channel.onopen = (event) => {
-      console.log(event);
-    };
+      console.log(event)
+    }
 
     channel.onerror = (event) => {
-      console.log(event);
-    };
+      console.log(event)
+    }
 
     channel.onclose = (event) => {
-      console.log(event);
-    };
+      console.log(event)
+    }
 
     // Add tank to game state
     setGameState({ tankState: defaultTankState, wallCoordinates: coordinates })
@@ -196,7 +201,7 @@ export const TankGame: React.FC = () => {
   }
 
   useEffect(() => {
-    document.addEventListener('keydown', function (event) {
+    const keyDownListener = (event: KeyboardEvent) => {
       event.preventDefault()
 
       let dir: Direction = gameState?.tankState.dir
@@ -217,10 +222,10 @@ export const TankGame: React.FC = () => {
       setGameState((old) => ({
         ...old,
         tankState: { ...old.tankState, dir },
-      }));
-    });
+      }))
+    }
 
-    document.addEventListener('keyup', function (event) {
+    const keyUpEvent = (event: KeyboardEvent) => {
       switch (event.code) {
         case 'ArrowLeft':
         case 'ArrowDown':
@@ -232,19 +237,27 @@ export const TankGame: React.FC = () => {
           }))
           break
       }
-    })
+    }
+
+    document.addEventListener('keydown', keyDownListener)
+    document.addEventListener('keyup', keyUpEvent)
+
+    return () => {
+      document.removeEventListener('keydown', keyDownListener)
+      document.removeEventListener('keyup', keyUpEvent)
+    }
   }, [])
 
   const setTankState = (updateTankState: (ts: TankState) => TankState) => {
     setGameState((old) => ({
       ...old,
       tankState: updateTankState(old.tankState),
-    }));
-  };
+    }))
+  }
 
   return (
     <>
-      <Menu initGame={initGame} isRoot={isRoot} connected={connected} />
+      <GameScreenControls isRoot={isRoot} />
       {connected && (
         <Stage
           width={FIELD_WIDTH}
