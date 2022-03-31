@@ -1,19 +1,20 @@
-export interface Position {
-  x: number;
-  y: number;
-}
-
 export interface Direction {
   x: number;
   y: number;
 }
 
 export interface TankState {
-  pos: Position;
+  pos: Coordinate;
   dir: Direction;
   color: number;
 }
 
+export interface Coordinate {
+  x: number;
+  y: number;
+}
+
 export interface GameState {
   tankState: TankState;
+  wallCoordinates: Coordinate[];
 }

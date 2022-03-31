@@ -1,4 +1,4 @@
-import { Position } from '../models/GameState';
+import { Coordinate } from '../models/GameState';
 
 export const determineRotation = (
   x: number,
@@ -29,7 +29,7 @@ export const determineRotation = (
 };
 
 export const checkCollision = (
-  pos: Position,
+  pos: Coordinate,
   x: number,
   y: number,
   w: number,
