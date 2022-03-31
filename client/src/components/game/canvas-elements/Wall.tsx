@@ -1,15 +1,13 @@
 import React from 'react'
 import { Container, Sprite } from '@inlet/react-pixi'
-import { Coordinate } from '../../../models/GameState'
+import { Wall as WallType } from '../../../models/GameState'
 
 interface Props {
-  coordinates: Coordinate[] | undefined
+  coordinates: WallType[]
 }
 
 export const Wall: React.FC<Props> = ({ coordinates }) => {
   const image = './src/images/wall.jpg'
-  const wallWidth = 50
-  const wallHeight = 50
 
   return (
     <Container>
@@ -18,10 +16,10 @@ export const Wall: React.FC<Props> = ({ coordinates }) => {
           <Sprite
             x={c.x}
             y={c.y}
-            anchor={0.5}
+            anchor={0}
             image={image}
-            width={wallWidth}
-            height={wallHeight}
+            width={c.size}
+            height={c.size}
           />
         ))}
     </Container>
