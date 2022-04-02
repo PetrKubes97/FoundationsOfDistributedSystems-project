@@ -3,13 +3,7 @@ import React, { useEffect } from 'react'
 import useState from 'react-usestateref'
 import { io, Socket } from 'socket.io-client'
 import { FIELD_HEIGHT, FIELD_WIDTH } from '../../config'
-import {
-  Coordinate,
-  Direction,
-  GameState,
-  TankState,
-  UserAction,
-} from '../../models/GameState'
+import { GameState, TankState, UserAction } from '../../models/GameState'
 import Tank from './canvas-elements/Tank'
 import { Wall } from './canvas-elements/Wall'
 import { GameScreenControls } from './GameScreenControls'

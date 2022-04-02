@@ -14,6 +14,7 @@ const io = new Server(server, {
 
 const JOIN_ROOM = 'join_room'
 const REPLY_ALL_JOIN_ROOM = 'reply_all_join_room'
+const SEND_MESSAGE_IN_ROOM = 'send_message_in_room'
 
 const peopleCntInRoom = (roomId) => io.sockets.adapter.rooms.get(roomId).size
 
@@ -42,6 +43,11 @@ io.on('connection', (socket) => {
 
   socket.on(JOIN_ROOM, (roomId) => {
     socket.join(roomId)
+
+    socket.on(SEND_MESSAGE_IN_ROOM, ({ channel, message }) => {
+      console.log('broadcasting to room: ', roomId, channel, message)
+      socket.to(roomId).emit(channel, message)
+    })
   })
 
   // Legacy

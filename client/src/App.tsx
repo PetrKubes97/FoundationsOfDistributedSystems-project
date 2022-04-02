@@ -3,7 +3,11 @@ import { useSearchParams } from 'react-router-dom'
 
 import React from 'react'
 import { Menu } from './components/menu/Menu'
-import { RoomConnectionProvider } from './components/game/RoomConnectionProvider'
+import { RoomConnectionProvider } from './components/game/connection-providers/RoomConnectionProvider'
+import {
+  WebRTCConnectionProvider,
+  WebRTCState,
+} from './components/game/connection-providers/WebRTCConnectionProvider'
 
 const App: React.FC = () => {
   const [searchParams] = useSearchParams()
@@ -12,7 +16,33 @@ const App: React.FC = () => {
   return (
     <div className="App">
       <header className="App-header">
-        {roomId && <RoomConnectionProvider roomId={roomId} />}
+        {roomId && (
+          <RoomConnectionProvider
+            roomId={roomId}
+            child={(roomConnection) => (
+              <WebRTCConnectionProvider
+                roomConnection={roomConnection}
+                child={(webRtcConnection) => {
+                  if (webRtcConnection.state == WebRTCState.CONNECTED) {
+                    console.log('app:', 'here')
+                    return (
+                      <button
+                        onClick={() => {
+                          webRtcConnection.handlers?.sendData(
+                            'hello from ' + roomConnection.role
+                          )
+                        }}
+                      >
+                        send
+                      </button>
+                    )
+                  }
+                  return <>asdf</>
+                }}
+              />
+            )}
+          />
+        )}
         {!roomId && <Menu />}
 
         <a
