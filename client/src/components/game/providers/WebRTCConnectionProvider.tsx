@@ -1,6 +1,5 @@
 import { RoomConnection, RoomRole } from './RoomConnectionProvider'
 import { FC, useEffect, useState } from 'react'
-import { GameState } from '../../../models/GameState'
 
 const ROOT_OFFER = 'root_offer'
 const NODE_OFFER = 'node_offer'

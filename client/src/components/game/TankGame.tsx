@@ -1,260 +1,106 @@
-import { Stage } from '@inlet/react-pixi'
-import React, { useEffect } from 'react'
-import useState from 'react-usestateref'
-import { io, Socket } from 'socket.io-client'
+import { Stage, Text, useTick } from '@inlet/react-pixi'
+import React, { useEffect, useRef, useState } from 'react'
 import { FIELD_HEIGHT, FIELD_WIDTH } from '../../config'
-import { GameState, TankState, UserAction } from '../../models/GameState'
 import Tank from './canvas-elements/Tank'
 import { Wall } from './canvas-elements/Wall'
 import { GameScreenControls } from './GameScreenControls'
-
-const ROOT_OFFER = 'root_offer'
-const NODE_OFFER = 'node_offer'
-const ICE_OFFER = 'ice_offer'
-
-const configuration = {
-  iceServers: [
-    {
-      urls: 'stun:openrelay.metered.ca:80',
-    },
-    {
-      urls: 'turn:openrelay.metered.ca:80',
-      username: 'openrelayproject',
-      credential: 'openrelayproject',
-    },
-    {
-      urls: 'turn:openrelay.metered.ca:443',
-      username: 'openrelayproject',
-      credential: 'openrelayproject',
-    },
-    {
-      urls: 'turn:openrelay.metered.ca:443?transport=tcp',
-      username: 'openrelayproject',
-      credential: 'openrelayproject',
-    },
-  ],
-}
-
-interface ConnectionObjects {
-  socket: Socket
-  connection: RTCPeerConnection
-  channel?: RTCDataChannel
-}
-
-const defaultTankState = {
-  color: 0x00ff00,
-  dir: { x: 0, y: 0 },
-  pos: { x: 100, y: 100 },
-}
+import {
+  Direction,
+  GameState,
+  UserAction,
+  UserActions,
+} from './game-logic/Game'
 
 type props = {
   gameState: GameState
-  setUserAction: (action: UserAction) => void
+  currentUserActions: UserActions
+  updateUserAction: (action: UserAction) => void
+  tick: () => void
+  isRoot: boolean
 }
 
-export const TankGame: React.FC<props> = ({ gameState, setUserAction }) => {
-  // TODO: This one will be super simple
-  // it will only a) display the game state it gets
-  // b) notify about player actions
+const useForceUpdate = () => {
+  const [, setValue] = useState(0) // integer state
+  return () => setValue((value) => value + 1) // update the state to force render
+}
 
-  console.log(gameState.wallCoordinates)
+export const TankGame: React.FC<props> = ({
+  gameState,
+  currentUserActions,
+  updateUserAction,
+  tick,
+  isRoot,
+}) => {
+  const forceUpdate = useForceUpdate()
+  const currentUserAction = isRoot
+    ? currentUserActions.rootAction
+    : currentUserActions.nodeAction
 
-  const [isRoot, setIsRoot] = useState<boolean>(false)
-  const [connected, setConnected] = useState<boolean>(true)
-  const [gameStateTODO, setGameStateTODO] = useState<GameState>({
-    wallCoordinates: gameState.wallCoordinates,
-    tanks: [defaultTankState],
-  })
-  const [connectionObjects, setConnectionObjects, connectionObjectsRef] =
-    useState<ConnectionObjects | undefined>(undefined)
-
-  const sendSocketIOMessage = (channel: string, message: any) => {
-    console.log('sendSocketIOMessage', channel, message)
-    const conn = connectionObjectsRef.current!
-    conn.socket.emit('message', { channel, message })
-  }
-
-  const sendWebRTCData = (data: any) => {
-    const stringified = JSON.stringify(data)
-    const conn = connectionObjectsRef.current!
-    console.log(conn.channel?.readyState)
-    if (conn?.channel?.readyState == 'open') {
-      conn?.channel?.send(stringified)
-    }
-  }
-
-  const listenToChannel = (channel: RTCDataChannel) => {
-    channel.onmessage = (event) => {
-      const parsed: GameState = JSON.parse(event.data)
-      console.log('On data channel', parsed)
-      setGameStateTODO(parsed)
-    }
-  }
+  // Ref is necessary since I don't want to reassign key listeners every time
+  // the state changes. Other, maybe better option would be to move key listeners
+  // to other component and just rebuild the game state
+  const actionRef = useRef(currentUserAction)
+  actionRef.current = currentUserAction
 
   useEffect(() => {
-    const socket = io('ws://localhost:4000')
-    const connection = new RTCPeerConnection(configuration)
-    setConnectionObjects({
-      socket,
-      connection,
-      channel: undefined,
-    })
-
-    connection.ondatachannel = (channelEvent) => {
-      console.log('ondatachannel', channelEvent)
-      const channel = channelEvent.channel
-      setConnectionObjects({ ...connectionObjects!, channel })
-      listenToChannel(channel)
-    }
-
-    connection.onicecandidate = (iceEvent) => {
-      console.log('On ice')
-      if (iceEvent.candidate) {
-        sendSocketIOMessage(ICE_OFFER, {
-          label: iceEvent.candidate.sdpMLineIndex,
-          id: iceEvent.candidate.sdpMid,
-          candidate: iceEvent.candidate.candidate,
-        })
-      }
-    }
-
-    socket.on(ROOT_OFFER, (message) => {
-      console.log('Client received ROOT_OFFER:', message)
-      connection
-        .setRemoteDescription(message)
-        .then(() => connection.createAnswer())
-        .then((answer) => connection.setLocalDescription(answer))
-        .then(() =>
-          sendSocketIOMessage(NODE_OFFER, connection.localDescription)
-        )
-        .then(() => setConnected(true))
-        .catch((err) => console.error(err))
-    })
-
-    socket.on(NODE_OFFER, (message) => {
-      console.log('Client received NODE_OFFER:', message)
-      connection.setRemoteDescription(message)
-    })
-
-    socket.on(ICE_OFFER, (message) => {
-      const candidate = new RTCIceCandidate({
-        sdpMLineIndex: message.label,
-        candidate: message.candidate,
-      })
-      connection.addIceCandidate(candidate)
-    })
-
-    return () => {
-      connection.close()
-    }
-  }, [])
-
-  const initGame = () => {
-    setIsRoot(true)
-    const connection = connectionObjects!.connection
-    const channel = connection.createDataChannel('sendDataChannel', {})
-    setConnectionObjects({ ...connectionObjects!, channel })
-    listenToChannel(channel)
-
-    connection
-      .createOffer()
-      .then((offer) => connection.setLocalDescription(offer))
-      .then(() => sendSocketIOMessage(ROOT_OFFER, connection.localDescription))
-      .catch((err) => console.error(err))
-    setConnected(true)
-
-    channel.onopen = (event) => {
-      console.log(event)
-    }
-
-    channel.onerror = (event) => {
-      console.log(event)
-    }
-
-    channel.onclose = (event) => {
-      console.log(event)
-    }
-
-    // Add tank to game state
-    // setGameStateTODO({
-    //   tankState: defaultTankState,
-    //   wallCoordinates: coordinates,
-    // })
-    // sendWebRTCData(gameStateTODO);
-  }
-
-  useEffect(() => {
-    const keyDownListener = (event: KeyboardEvent) => {
+    const keyListener = (isUp: boolean) => (event: KeyboardEvent) => {
       event.preventDefault()
 
-      // let dir: Direction = gameStateTODO?.tankState.dir
-      // switch (event.code) {
-      //   case 'ArrowUp':
-      //     dir = { ...dir, y: -1 }
-      //     break
-      //   case 'ArrowDown':
-      //     dir = { ...dir, y: 1 }
-      //     break
-      //   case 'ArrowLeft':
-      //     dir = { ...dir, x: -1 }
-      //     break
-      //   case 'ArrowRight':
-      //     dir = { ...dir, x: 1 }
-      //     break
-      // }
-      // setGameStateTODO((old) => ({
-      //   ...old,
-      //   tankState: { ...old.tankState, dir },
-      // }))
-    }
+      // TODO: For better responsivity, keep track of which keys are pressed
+      // and calculate direcation based on that
 
-    const keyUpEvent = (event: KeyboardEvent) => {
+      let direction = actionRef.current.direction
+      const speed = isUp ? 0 : 1
       switch (event.code) {
-        case 'ArrowLeft':
-        case 'ArrowDown':
-        case 'ArrowRight':
         case 'ArrowUp':
-          // setGameStateTODO((old) => ({
-          //   ...old,
-          //   tankState: { ...old.tankState, dir: { x: 0, y: 0 } },
-          // }))
+          direction = { ...direction, y: -speed }
+          break
+        case 'ArrowDown':
+          direction = { ...direction, y: speed }
+          break
+        case 'ArrowLeft':
+          direction = { ...direction, x: -speed }
+          break
+        case 'ArrowRight':
+          direction = { ...direction, x: speed }
           break
       }
+      console.log('new', direction)
+      updateUserAction({ ...currentUserAction, direction: direction })
     }
 
-    document.addEventListener('keydown', keyDownListener)
-    document.addEventListener('keyup', keyUpEvent)
+    const upListener = keyListener(true)
+    const downListener = keyListener(false)
+
+    document.addEventListener('keydown', downListener)
+    document.addEventListener('keyup', upListener)
 
     return () => {
-      document.removeEventListener('keydown', keyDownListener)
-      document.removeEventListener('keyup', keyUpEvent)
+      document.removeEventListener('keydown', downListener)
+      document.removeEventListener('keyup', upListener)
     }
   }, [])
 
-  const setTankState = (updateTankState: (ts: TankState) => TankState) => {
-    setGameStateTODO((old) => ({
-      ...old,
-      // tankState: updateTankState(old.tankState),
-    }))
-  }
+  useTick(() => {
+    tick()
+    // This is the hackiest part by far. Tick updates the state in game class,
+    // but that does not trigger re-render, since it's not a state.
+    // We can force the re-render with this function.
+    forceUpdate()
+  })
 
   return (
     <>
-      <GameScreenControls isRoot={isRoot} />
-      {connected && (
-        <Stage
-          width={FIELD_WIDTH}
-          height={FIELD_HEIGHT}
-          options={{ backgroundColor: 0x505152 }}
-        >
-          <Tank
-            tankState={gameStateTODO?.tanks?.at(0)}
-            setTankState={setTankState}
-            wallCoordinate={gameStateTODO?.wallCoordinates}
-          />
-          <Wall coordinates={gameStateTODO?.wallCoordinates} />
-        </Stage>
-      )}
+      <Tank
+        tankState={gameState.rootTank}
+        userAction={currentUserActions.rootAction}
+      />
+      <Tank
+        tankState={gameState.nodeTank}
+        userAction={currentUserActions.nodeAction}
+      />
+      <Wall coordinates={gameState.wallCoordinates} />
+      <Text text={JSON.stringify(currentUserAction)} />
     </>
   )
 }
