@@ -130,7 +130,10 @@ export const WebRTCConnectionProvider: FC<Props> = ({
         connection.setRemoteDescription(message)
       })
 
-      const channel = connection.createDataChannel('sendDataChannel', {})
+      const channel = connection.createDataChannel('sendDataChannel', {
+        maxRetransmits: 0,
+        ordered: false,
+      })
 
       connection
         .createOffer()
