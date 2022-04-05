@@ -33,20 +33,22 @@ export type Wall = {
   size: number
 }
 
-export type GameState = {
-  rootTank: TankState
-  nodeTank: TankState
-  wallCoordinates: Wall[]
-}
-
 export type UserActions = {
   rootAction: UserAction
   nodeAction: UserAction
 }
 
+// User actions are actually part of the game state, since they determine the
+// tanks orientation
+export type GameState = {
+  rootTank: TankState
+  nodeTank: TankState
+  wallCoordinates: Wall[]
+  userActions: UserActions
+}
+
 export class Game {
   gameState: GameState
-  userActions: UserActions
 
   constructor() {
     this.gameState = {
@@ -65,17 +67,17 @@ export class Game {
         color: 0xffffff * 0.5,
       },
       wallCoordinates: mapToCoordinates(map),
-    }
-    console.log('here')
-    this.userActions = {
-      nodeAction: { direction: { x: 0, y: 0 }, shooting: false },
-      rootAction: { direction: { x: 0, y: 0 }, shooting: false },
+      userActions: {
+        nodeAction: { direction: { x: 0, y: 0 }, shooting: false },
+        rootAction: { direction: { x: 0, y: 0 }, shooting: false },
+      },
     }
   }
 
   update() {
     // TODO apply action to state, including checking for walls etc. Could be done by copying
     // the state or updating it directly
+    console.log('updating', this.gameState)
 
     const calculateClampedPosition = (
       direction: Direction,
@@ -98,20 +100,17 @@ export class Game {
       }
     }
 
-    // console.log('inClass:', this)
-    // console.log('inClass:', this.userActions)
-    // console.log('inClass:', this.userActions.nodeAction)
-    // console.log('inClass:', this.userActions.nodeAction.direction)
-
     this.gameState.rootTank.pos = calculateClampedPosition(
       this.gameState.rootTank.pos,
-      this.userActions.rootAction.direction
+      this.gameState.userActions.rootAction.direction
     )
 
     this.gameState.nodeTank.pos = calculateClampedPosition(
       this.gameState.nodeTank.pos,
-      this.userActions.nodeAction.direction
+      this.gameState.userActions.nodeAction.direction
     )
+
+    console.log('done', this.gameState)
 
     // if (tankState) {
     //   const oldPosX = tankState.pos.x

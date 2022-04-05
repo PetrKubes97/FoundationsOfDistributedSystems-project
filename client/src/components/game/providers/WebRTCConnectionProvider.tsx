@@ -73,16 +73,18 @@ export const WebRTCConnectionProvider: FC<Props> = ({
     let localListener: (data: any) => void | undefined
     webRtcLog('handling successful connect')
     channel.onmessage = (ev) => {
-      webRtcLog('got message', ev)
-      localListener?.(ev)
+      const data = JSON.parse(ev.data)
+      webRtcLog('got message', data)
+      localListener?.(data)
     }
 
     setWebRTCConnection({
       state: WebRTCState.CONNECTED,
       handlers: {
         sendData: (data) => {
-          webRtcLog('sending data', data)
-          channel.send(data)
+          const stringified = JSON.stringify(data)
+          webRtcLog('sending data', stringified)
+          channel.send(stringified)
         },
         setDataListener: (listener) => {
           webRtcLog('setting listener')

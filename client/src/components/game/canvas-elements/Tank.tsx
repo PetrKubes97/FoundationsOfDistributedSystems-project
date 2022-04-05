@@ -17,14 +17,14 @@ interface Props {
 }
 
 export const Tank: React.FC<Props> = ({ tankState, userAction }) => {
-  const ref = useRef(0)
+  const previousRotation = useRef(0)
 
   const rotation = determineRotation(
     userAction.direction.x,
     userAction.direction.y,
-    ref.current
+    previousRotation.current
   )
-  ref.current = rotation
+  previousRotation.current = rotation
 
   return (
     <>

@@ -11,11 +11,16 @@ import {
   WebRTCConnectionProvider,
   WebRTCState,
 } from './components/game/providers/WebRTCConnectionProvider'
-import { Game } from './components/game/game-logic/Game'
+import { Game, UserAction } from './components/game/game-logic/Game'
 import TankGame from './components/game/TankGame'
 import { AppProvider, Stage } from '@inlet/react-pixi'
 import { GameScreenControls } from './components/game/GameScreenControls'
 import { FIELD_HEIGHT, FIELD_WIDTH } from './config'
+import {
+  Key,
+  KeyControlsProvider,
+} from './components/game/providers/KeyControlsProvider'
+import { keysToAction } from './components/game/gameHelpers'
 
 const App: React.FC = () => {
   const [searchParams] = useSearchParams()
@@ -38,51 +43,93 @@ const App: React.FC = () => {
                   const isRoot = roomConnection.role == RoomRole.ROOT
 
                   if (webRtcConnection.state == WebRTCState.CONNECTED) {
+                    /*
+                     * Short explanation how this whole thing works:
+                     * Basically there are three streams of events
+                     *   - webRtc data
+                     *   - key presses
+                     *   - game loop
+                     * It's not very reacty, because I did not want force a redraw
+                     * of components every time any of these events comes in.
+                     *
+                     * Soooo in case of root, key press callback and webRTC are constantly
+                     * setting the user actions, which are used to calculate the new game state
+                     * on each tick.
+                     *
+                     * The node receives new game state which overrides its own,
+                     * but still calculates new states. It might still look okay-ish smooth
+                     * when the connection is slow.
+                     *
+                     * The only component that updates in the game loop is the <TankGame/>
+                     * which forces its update on each tick and draws the new game state -> it's still
+                     * the same reference in memory, so react trigger does not happen automatically. Which
+                     * is a good thing.
+                     *
+                     * Possible refactoring: maybe the providers should be replaced by custom hooks?
+                     * */
+
                     const game = new Game()
-                    appLog('app:', 'starting the game...')
+                    appLog('starting the game...')
 
                     webRtcConnection.handlers?.setDataListener((data) => {
-                      appLog('got data', data)
-                      // if (isRoot) {
-                      //   game.userActions = {
-                      //     ...game.userActions,
-                      //     nodeAction: data,
-                      //   }
-                      // } else {
-                      //   game.gameState = data
-                      // }
+                      if (isRoot) {
+                        // Root is receiving only the node action, let's update it! 😎
+                        game.gameState.userActions = {
+                          ...game.gameState.userActions,
+                          nodeAction: data,
+                        }
+                      } else {
+                        // This might be a little confusing 🤨... The reason for this shananigans
+                        // is that node is receiving the whole state - including the node action!
+                        // But we want the node decide what it wants to do! 🤓
+                        const nodeAction = game.gameState.userActions.nodeAction
+                        game.gameState = data
+                        game.gameState.userActions.nodeAction = nodeAction
+                      }
                     })
 
+                    const onKeysUpdated = (keys: Key[]) => {
+                      const newAction = keysToAction(keys)
+                      if (isRoot) {
+                        game.gameState.userActions.rootAction = newAction
+                      } else {
+                        game.gameState.userActions.nodeAction = newAction
+                      }
+                    }
+
+                    const onGameTick = () => {
+                      game.update()
+                      if (isRoot) {
+                        webRtcConnection?.handlers?.sendData(game.gameState)
+                      } else {
+                        webRtcConnection?.handlers?.sendData(
+                          game.gameState.userActions.nodeAction
+                        )
+                      }
+                    }
+
                     return (
-                      <>
-                        <GameScreenControls isRoot={isRoot} />
-                        <Stage
-                          width={FIELD_WIDTH}
-                          height={FIELD_HEIGHT}
-                          options={{ backgroundColor: 0x505152 }}
-                        >
-                          <TankGame
-                            isRoot={isRoot}
-                            gameState={game.gameState}
-                            currentUserActions={game.userActions}
-                            updateUserAction={(action) => {
-                              if (isRoot) {
-                                game.userActions.rootAction = action
-                              } else {
-                                game.userActions.nodeAction = action
-                              }
-                              // console.log('--------')
-                              // console.log(action)
-                              // console.log(game)
-                              // console.log(game.userActions)
-                              // console.log(game.userActions.nodeAction)
-                            }}
-                            tick={() => {
-                              game.update()
-                            }}
-                          />
-                        </Stage>
-                      </>
+                      <KeyControlsProvider
+                        child={(setKeyPressHandler) => {
+                          setKeyPressHandler(onKeysUpdated)
+                          return (
+                            <>
+                              <GameScreenControls isRoot={isRoot} />
+                              <Stage
+                                width={FIELD_WIDTH}
+                                height={FIELD_HEIGHT}
+                                options={{ backgroundColor: 0x505152 }}
+                              >
+                                <TankGame
+                                  isRoot={isRoot}
+                                  game={game}
+                                  tick={onGameTick}
+                                />
+                              </Stage>
+                            </>
+                          )
+                        }}
+                      />
                     )
                   }
                   return <>Loading...</>

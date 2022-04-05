@@ -6,15 +6,14 @@ import { Wall } from './canvas-elements/Wall'
 import { GameScreenControls } from './GameScreenControls'
 import {
   Direction,
+  Game,
   GameState,
   UserAction,
   UserActions,
 } from './game-logic/Game'
 
 type props = {
-  gameState: GameState
-  currentUserActions: UserActions
-  updateUserAction: (action: UserAction) => void
+  game: Game
   tick: () => void
   isRoot: boolean
 }
@@ -24,62 +23,15 @@ const useForceUpdate = () => {
   return () => setValue((value) => value + 1) // update the state to force render
 }
 
-export const TankGame: React.FC<props> = ({
-  gameState,
-  currentUserActions,
-  updateUserAction,
-  tick,
-  isRoot,
-}) => {
+export const TankGame: React.FC<props> = ({ game, tick, isRoot }) => {
   const forceUpdate = useForceUpdate()
+
+  const gameState = game.gameState
+  const userActions = game.gameState.userActions
+
   const currentUserAction = isRoot
-    ? currentUserActions.rootAction
-    : currentUserActions.nodeAction
-
-  // Ref is necessary since I don't want to reassign key listeners every time
-  // the state changes. Other, maybe better option would be to move key listeners
-  // to other component and just rebuild the game state
-  const actionRef = useRef(currentUserAction)
-  actionRef.current = currentUserAction
-
-  useEffect(() => {
-    const keyListener = (isUp: boolean) => (event: KeyboardEvent) => {
-      event.preventDefault()
-
-      // TODO: For better responsivity, keep track of which keys are pressed
-      // and calculate direcation based on that
-
-      let direction = actionRef.current.direction
-      const speed = isUp ? 0 : 1
-      switch (event.code) {
-        case 'ArrowUp':
-          direction = { ...direction, y: -speed }
-          break
-        case 'ArrowDown':
-          direction = { ...direction, y: speed }
-          break
-        case 'ArrowLeft':
-          direction = { ...direction, x: -speed }
-          break
-        case 'ArrowRight':
-          direction = { ...direction, x: speed }
-          break
-      }
-      console.log('new', direction)
-      updateUserAction({ ...currentUserAction, direction: direction })
-    }
-
-    const upListener = keyListener(true)
-    const downListener = keyListener(false)
-
-    document.addEventListener('keydown', downListener)
-    document.addEventListener('keyup', upListener)
-
-    return () => {
-      document.removeEventListener('keydown', downListener)
-      document.removeEventListener('keyup', upListener)
-    }
-  }, [])
+    ? userActions.rootAction
+    : userActions.nodeAction
 
   useTick(() => {
     tick()
@@ -93,11 +45,11 @@ export const TankGame: React.FC<props> = ({
     <>
       <Tank
         tankState={gameState.rootTank}
-        userAction={currentUserActions.rootAction}
+        userAction={userActions.rootAction}
       />
       <Tank
         tankState={gameState.nodeTank}
-        userAction={currentUserActions.nodeAction}
+        userAction={userActions.nodeAction}
       />
       <Wall coordinates={gameState.wallCoordinates} />
       <Text text={JSON.stringify(currentUserAction)} />

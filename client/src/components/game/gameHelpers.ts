@@ -1,5 +1,6 @@
 import { FIELD_WIDTH } from '../../config'
-import { Coordinate, Wall } from './game-logic/Game'
+import { Coordinate, Direction, UserAction, Wall } from './game-logic/Game'
+import { Key } from './providers/KeyControlsProvider'
 
 export const map: number[][] = [
   [0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
@@ -70,6 +71,52 @@ export const checkCollision = (
   h: number
 ) => {
   return pos.x > x - w && pos.x < x + w && pos.y > y - h && pos.y < y + h
+}
+
+const keyToDirMapping = {
+  [Key.up]: { x: 0, y: -1 },
+  [Key.down]: { x: 0, y: 1 },
+  [Key.left]: { x: -1, y: 0 },
+  [Key.right]: { x: 1, y: 0 },
+}
+const keyToDirections = (
+  lastPressed: Key,
+  secondLastPressed: Key | undefined
+): Direction => {
+  if (secondLastPressed === undefined) {
+    return keyToDirMapping[lastPressed]
+  }
+
+  const dir1 = keyToDirMapping[lastPressed]
+  const dir2 = keyToDirMapping[secondLastPressed]
+
+  // I'm genius 🤪
+  return {
+    x: dir1.x + dir2.x,
+    y: dir1.y + dir2.y,
+  }
+}
+
+export const keysToAction = (keys: Key[]): UserAction => {
+  let newAction: UserAction = {
+    direction: { x: 0, y: 0 },
+    shooting: false,
+  }
+
+  if (keys.length >= 1) {
+    const lastPressedKey = keys[keys.length - 1]
+    let secondLastPressedKey: Key | undefined = undefined
+    if (keys.length >= 2) {
+      secondLastPressedKey = keys[keys.length - 2]
+    }
+
+    newAction = {
+      direction: keyToDirections(lastPressedKey, secondLastPressedKey),
+      shooting: false,
+    }
+  }
+
+  return newAction
 }
 
 export {}
