@@ -1,7 +1,7 @@
 import './App.css'
 import { useSearchParams } from 'react-router-dom'
 
-import React from 'react'
+import React, { useRef } from 'react'
 import { Menu } from './components/menu/Menu'
 import {
   RoomConnectionProvider,
@@ -42,6 +42,11 @@ const App: React.FC = () => {
                 child={(webRtcConnection) => {
                   const isRoot = roomConnection.role == RoomRole.ROOT
 
+                  const PING = 'ping'
+                  const PING_REPLY = 'ping_reply'
+                  const pingResultRef = useRef<HTMLParagraphElement>(null)
+                  let pingStart: number = 0
+
                   if (webRtcConnection.state == WebRTCState.CONNECTED) {
                     /*
                      * Short explanation how this whole thing works:
@@ -72,6 +77,16 @@ const App: React.FC = () => {
                     appLog('starting the game...')
 
                     webRtcConnection.handlers?.setDataListener((data) => {
+                      if (data == PING) {
+                        webRtcConnection.handlers?.sendData(PING_REPLY)
+                        return
+                      }
+
+                      if (data == PING_REPLY) {
+                        const millisSinceStart = performance.now() - pingStart
+                        pingResultRef.current!.innerText = `${millisSinceStart} ms`
+                      }
+
                       if (isRoot) {
                         // Root is receiving only the node action, let's update it! 😎
                         game.gameState.userActions = {
@@ -108,12 +123,19 @@ const App: React.FC = () => {
                       }
                     }
 
+                    const ping = () => {
+                      pingStart = performance.now()
+                      webRtcConnection.handlers?.sendData(PING)
+                    }
+
                     return (
                       <KeyControlsProvider
                         child={(setKeyPressHandler) => {
                           setKeyPressHandler(onKeysUpdated)
                           return (
                             <>
+                              <button onClick={ping}>Ping!</button>
+                              <p ref={pingResultRef} />
                               <GameScreenControls isRoot={isRoot} />
                               <Stage
                                 width={FIELD_WIDTH}
