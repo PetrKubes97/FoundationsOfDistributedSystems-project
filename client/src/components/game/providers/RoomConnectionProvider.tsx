@@ -51,7 +51,8 @@ export const RoomConnectionProvider: FC<Props> = ({ roomId, child }) => {
   }
 
   useEffect(() => {
-    const socket = io('ws://localhost:4000')
+    const url = import.meta.env.VITE_SERVER_URL
+    const socket = io(`ws://${url}:4000`)
     socket.emit(JOIN_ROOM, roomId)
     socket.on(
       REPLY_ALL_JOIN_ROOM,
