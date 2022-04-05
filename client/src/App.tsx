@@ -85,6 +85,7 @@ const App: React.FC = () => {
                       if (data == PING_REPLY) {
                         const millisSinceStart = performance.now() - pingStart
                         pingResultRef.current!.innerText = `${millisSinceStart} ms`
+                        return
                       }
 
                       if (isRoot) {
