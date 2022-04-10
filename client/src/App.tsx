@@ -137,7 +137,7 @@ const App: React.FC = () => {
                             <>
                               <button onClick={ping}>Ping!</button>
                               <p ref={pingResultRef} />
-                              <GameScreenControls isRoot={isRoot} />
+                              <GameScreenControls isRoot={isRoot} gameState={game.gameState}/>
                               <Stage
                                 width={FIELD_WIDTH}
                                 height={FIELD_HEIGHT}

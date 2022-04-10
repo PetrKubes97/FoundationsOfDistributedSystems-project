@@ -57,14 +57,14 @@ export class Game {
           x: 0,
           y: 0,
         },
-        color: 0xffffff,
+        color: 0x808000,
       },
       rootTank: {
         pos: {
-          x: 100,
-          y: 100,
+          x: FIELD_WIDTH,
+          y: 0,
         },
-        color: 0xffffff * 0.5,
+        color: 0xA9513F,
       },
       wallCoordinates: mapToCoordinates(map),
       userActions: {

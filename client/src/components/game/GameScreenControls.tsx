@@ -1,22 +1,46 @@
 import React from 'react'
-import GreenTank from '../../images/tank.png'
-import OrangeTank from '../../images/OpponentTank.png'
+import TankImage from '../../images/tank.png'
+import {GameState} from './game-logic/Game'
+import { Sprite, Stage } from '@inlet/react-pixi'
+import {
+  TANK_HEIGHT,
+  TANK_WIDTH,
+} from '../../config'
 
 interface Props {
   isRoot: boolean
+  gameState: GameState
 }
 
-export const GameScreenControls: React.FC<Props> = ({ isRoot }) => {
+const tankSprite = (tint: number) => {
+  return (
+    <Stage
+      width={50}
+      height={50}
+      options={{ backgroundColor: undefined, backgroundAlpha: 0 }}
+    >
+      <Sprite
+        image={TankImage}
+        tint={tint}
+        width={TANK_WIDTH}
+        height={TANK_HEIGHT}
+      />
+    </Stage>
+  );
+};
+
+export const GameScreenControls: React.FC<Props> = ({ isRoot, gameState }) => {
+
   return (
     <>
       <div style={{ width: '100%' }}>
         <div style={{ width: '50%', height: '100px', float: 'left' }}>
           <div>{`You${isRoot ? ' (root)' : ' (node)'}:`}</div>
-          <img src={GreenTank} className="App-logo" width={50} height={50} />
+            {tankSprite(isRoot ? gameState.rootTank.color : gameState.nodeTank.color)}
         </div>
         <div style={{ marginLeft: '50%', height: '100px' }}>
           <div>Opponent:</div>
-          <img src={OrangeTank} className="App-logo" width={50} height={50} />
+          {tankSprite(isRoot ? gameState.nodeTank.color : gameState.rootTank.color)}
         </div>
       </div>
     </>
