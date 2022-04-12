@@ -41,6 +41,7 @@ export enum WebRTCState {
 
 type WebRTCConnection = {
   state: WebRTCState
+  connectionDescription: string
   handlers:
     | {
         sendData: (data: any) => void
@@ -55,6 +56,7 @@ export const WebRTCConnectionProvider: FC<Props> = ({
 }) => {
   const uninitializedWebRTCState = {
     state: WebRTCState.UNINITIALIZED,
+    connectionDescription: '',
     handlers: undefined,
   }
   const [webRTCConnection, setWebRTCConnection] = useState<WebRTCConnection>(
@@ -66,10 +68,13 @@ export const WebRTCConnectionProvider: FC<Props> = ({
   }
 
   const webRtcLog = (...log: any[]) => {
-    console.log('webRtc: ', ...log)
+    // console.log('webRtc: ', ...log)
   }
 
-  const handleSuccessfulConnect = (channel: RTCDataChannel) => {
+  const handleSuccessfulConnect = async (
+    channel: RTCDataChannel,
+    connection: RTCPeerConnection
+  ) => {
     let localListener: (data: any) => void | undefined
     webRtcLog('handling successful connect')
     channel.onmessage = (ev) => {
@@ -78,8 +83,31 @@ export const WebRTCConnectionProvider: FC<Props> = ({
       localListener?.(data)
     }
 
+    const stats = await connection.getStats()
+
+    let statsString = 'unknown'
+    console.log(stats.entries())
+
+    stats.forEach((value, key) => {
+      if (
+        stats.get(key).type == 'candidate-pair' &&
+        stats.get(key).nominated &&
+        stats.get(key).state == 'succeeded'
+      ) {
+        const getCandidateDescription = (candidate: any) =>
+          `${candidate.ip}:${candidate.port} ${candidate.protocol} ${candidate.candidateType}`
+        const remote = stats.get(stats.get(key).remoteCandidateId)
+        const local = stats.get(stats.get(key).localCandidateId)
+        statsString = `
+          Remote: ${getCandidateDescription(remote)}
+          Local: ${getCandidateDescription(local)}
+        `
+      }
+    })
+
     setWebRTCConnection({
       state: WebRTCState.CONNECTED,
+      connectionDescription: statsString,
       handlers: {
         sendData: (data) => {
           const stringified = JSON.stringify(data)
@@ -111,7 +139,7 @@ export const WebRTCConnectionProvider: FC<Props> = ({
       connection.ondatachannel = (channelEvent) => {
         webRtcLog('ondatachannel', channelEvent)
         const channel = channelEvent.channel
-        handleSuccessfulConnect(channel)
+        handleSuccessfulConnect(channel, connection)
       }
 
       roomConnection.handlers.registerCallback(ROOT_OFFER, (message) => {
@@ -149,7 +177,7 @@ export const WebRTCConnectionProvider: FC<Props> = ({
 
       channel.onerror = channel.onclose = log
       channel.onopen = () => {
-        handleSuccessfulConnect(channel)
+        handleSuccessfulConnect(channel, connection)
       }
     }
 
@@ -180,7 +208,10 @@ export const WebRTCConnectionProvider: FC<Props> = ({
   return (
     <>
       <b>WebRTC connection state for nerds:</b>
-      <p>{JSON.stringify(webRTCConnection)}</p>
+      <p>{webRTCConnection.state}</p>
+      <p style={{ whiteSpace: 'pre-wrap' }}>
+        {webRTCConnection.connectionDescription}
+      </p>
       {child(webRTCConnection)}
     </>
   )

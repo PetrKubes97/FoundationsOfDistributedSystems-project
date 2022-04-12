@@ -64,7 +64,7 @@ export class Game {
           x: FIELD_WIDTH,
           y: 0,
         },
-        color: 0xA9513F,
+        color: 0xa9513f,
       },
       wallCoordinates: mapToCoordinates(map),
       userActions: {
@@ -77,7 +77,7 @@ export class Game {
   update() {
     // TODO apply action to state, including checking for walls etc. Could be done by copying
     // the state or updating it directly
-    console.log('updating', this.gameState)
+    // console.log('updating', this.gameState)
 
     const calculateClampedPosition = (
       direction: Direction,
@@ -110,7 +110,7 @@ export class Game {
       this.gameState.userActions.nodeAction.direction
     )
 
-    console.log('done', this.gameState)
+    // console.log('done', this.gameState)
 
     // if (tankState) {
     //   const oldPosX = tankState.pos.x
