@@ -27,20 +27,16 @@ export const Tank: React.FC<Props> = ({ tankState, userAction }) => {
   previousRotation.current = rotation
 
   return (
-    <>
-      {tankState && (
-        <Sprite
-          x={tankState.pos.x}
-          y={tankState.pos.y}
-          anchor={0.5}
-          image={TankImage}
-          tint={tankState.color}
-          width={TANK_WIDTH}
-          height={TANK_HEIGHT}
-          rotation={(rotation * Math.PI) / 180}
-        />
-      )}
-    </>
+    <Sprite
+      x={tankState.pos.x}
+      y={tankState.pos.y}
+      anchor={0.5}
+      image={TankImage}
+      tint={tankState.color}
+      width={TANK_WIDTH}
+      height={TANK_HEIGHT}
+      rotation={(rotation * Math.PI) / 180}
+    />
   )
 }
 
