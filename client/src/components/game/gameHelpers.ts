@@ -40,7 +40,8 @@ export const determineRotation = (
   y: number,
   lastRotation: number
 ): number => {
-  switch (x + '|' + y) {
+  // This feels stupid 😅
+  switch (Math.round(x) + '|' + Math.round(y)) {
     case '1|0':
       return 0
     case '1|1':
@@ -90,10 +91,16 @@ const keyToDirections = (
   const dir1 = keyToDirMapping[lastPressed]
   const dir2 = keyToDirMapping[secondLastPressed]
 
+  const directionalSpeed =
+    Math.abs(dir1.x) + Math.abs(dir2.y) == 2 ||
+    Math.abs(dir1.y) + Math.abs(dir2.x) == 2
+      ? 0.7071067812 // sqrt(2) / 2
+      : 1
+
   // I'm genius 🤪
   return {
-    x: dir1.x + dir2.x,
-    y: dir1.y + dir2.y,
+    x: (dir1.x + dir2.x) * directionalSpeed,
+    y: (dir1.y + dir2.y) * directionalSpeed,
   }
 }
 
