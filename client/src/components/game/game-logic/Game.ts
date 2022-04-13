@@ -1,4 +1,4 @@
-import { map, mapToCoordinates } from '../gameHelpers'
+import { checkCollision, map, mapToCoordinates } from '../gameHelpers'
 import {
   FIELD_HEIGHT,
   FIELD_WIDTH,
@@ -6,6 +6,7 @@ import {
   TANK_WIDTH,
 } from '../../../config'
 import tankGame from '../TankGame'
+import { Wall } from '../canvas-elements/Wall'
 
 export type UserAction = {
   direction: Direction
@@ -85,14 +86,29 @@ export class Game {
     ): Coordinate => {
       // TODO wall checking here
 
-      const newPositionX = Math.min(
+      let newPositionX = Math.min(
         Math.max(TANK_WIDTH / 2, position.x + direction.x),
         FIELD_WIDTH - TANK_WIDTH / 2
       )
-      const newPositionY = Math.min(
+      let newPositionY = Math.min(
         Math.max(TANK_HEIGHT / 2, position.y + direction.y),
         FIELD_HEIGHT - TANK_HEIGHT / 2
       )
+
+      const wallCoordinates = this.gameState.wallCoordinates
+      for (const wallCoordinate of wallCoordinates) {
+        if (
+          checkCollision({ x: newPositionX, y: newPositionY }, TANK_HEIGHT, {
+            // Very ugly, walls use origin in corner, tank in the center
+            x: wallCoordinate.x + wallCoordinate.size / 2,
+            y: wallCoordinate.y + wallCoordinate.size / 2,
+            size: wallCoordinate.size,
+          })
+        ) {
+          newPositionX = position.x
+          newPositionY = position.y
+        }
+      }
 
       return {
         x: newPositionX,
@@ -101,13 +117,13 @@ export class Game {
     }
 
     this.gameState.rootTank.pos = calculateClampedPosition(
-      this.gameState.rootTank.pos,
-      this.gameState.userActions.rootAction.direction
+      this.gameState.userActions.rootAction.direction,
+      this.gameState.rootTank.pos
     )
 
     this.gameState.nodeTank.pos = calculateClampedPosition(
-      this.gameState.nodeTank.pos,
-      this.gameState.userActions.nodeAction.direction
+      this.gameState.userActions.nodeAction.direction,
+      this.gameState.nodeTank.pos
     )
 
     // console.log('done', this.gameState)

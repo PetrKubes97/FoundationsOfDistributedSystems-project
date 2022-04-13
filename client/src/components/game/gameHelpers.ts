@@ -65,13 +65,19 @@ export const determineRotation = (
 }
 
 export const checkCollision = (
-  pos: Coordinate,
-  x: number,
-  y: number,
-  w: number,
-  h: number
+  tankPos: Coordinate,
+  tankSize: number,
+  wallPos: Wall
 ) => {
-  return pos.x > x - w && pos.x < x + w && pos.y > y - h && pos.y < y + h
+  const halfTankSize = tankSize / 2
+  const halfWallSize = wallPos.size / 2
+
+  return (
+    tankPos.x + halfTankSize > wallPos.x - halfWallSize &&
+    tankPos.x - halfTankSize < wallPos.x + halfWallSize &&
+    tankPos.y + halfTankSize > wallPos.y - halfWallSize &&
+    tankPos.y - halfTankSize < wallPos.y + halfWallSize
+  )
 }
 
 const keyToDirMapping = {
