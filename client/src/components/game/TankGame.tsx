@@ -52,7 +52,6 @@ export const TankGame: React.FC<props> = ({ game, tick, isRoot }) => {
         userAction={userActions.nodeAction}
       />
       <Wall coordinates={gameState.wallCoordinates} />
-      <Text text={JSON.stringify(currentUserAction)} />
     </>
   )
 }

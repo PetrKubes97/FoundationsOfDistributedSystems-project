@@ -76,16 +76,10 @@ export class Game {
   }
 
   update() {
-    // TODO apply action to state, including checking for walls etc. Could be done by copying
-    // the state or updating it directly
-    // console.log('updating', this.gameState)
-
     const calculateClampedPosition = (
       direction: Direction,
       position: Coordinate
     ): Coordinate => {
-      // TODO wall checking here
-
       let newPositionX = Math.min(
         Math.max(TANK_WIDTH / 2, position.x + direction.x),
         FIELD_WIDTH - TANK_WIDTH / 2
@@ -125,41 +119,5 @@ export class Game {
       this.gameState.userActions.nodeAction.direction,
       this.gameState.nodeTank.pos
     )
-
-    // console.log('done', this.gameState)
-
-    // if (tankState) {
-    //   const oldPosX = tankState.pos.x
-    //   const oldPosY = tankState.pos.y
-    //
-    //   let newPositionX = Math.min(
-    //     Math.max(TANK_WIDTH / 2, tankState.pos.x + tankState.dir.x),
-    //     FIELD_WIDTH - TANK_WIDTH / 2
-    //   )
-    //   let newPositionY = Math.min(
-    //     Math.max(0 + TANK_HEIGHT / 2, tankState.pos.y + tankState.dir.y),
-    //     FIELD_HEIGHT - TANK_HEIGHT / 2
-    //   )
-    //
-    //   for (let i = 0; i < wallCoordinates.length; i++) {
-    //     if (
-    //       checkCollision(
-    //         // tankState.pos,
-    //         { x: newPositionX, y: newPositionY },
-    //         wallCoordinates[i]['x'],
-    //         wallCoordinates[i]['y'],
-    //         TANK_WIDTH,
-    //         TANK_HEIGHT
-    //       )
-    //     ) {
-    //       newPositionX = oldPosX
-    //       newPositionY = oldPosY
-    //     }
-    //   }
-    //   setTankState((old) => ({
-    //     ...old,
-    //     pos: { x: newPositionX, y: newPositionY },
-    //   }))
-    // }
   }
 }

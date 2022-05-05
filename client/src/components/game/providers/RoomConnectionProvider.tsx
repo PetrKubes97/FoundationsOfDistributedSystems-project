@@ -1,7 +1,5 @@
 import { FC, useEffect, useState } from 'react'
-import TankGame from '../TankGame'
 import { io } from 'socket.io-client'
-import { WebRTCConnectionProvider } from './WebRTCConnectionProvider'
 
 export enum RoomRole {
   UNKNOWN = 'unknown',
