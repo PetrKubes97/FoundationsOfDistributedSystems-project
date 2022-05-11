@@ -32,7 +32,6 @@ const App: React.FC = () => {
 
   return (
     <div className="App">
-      <p>{import.meta.env.VITE_SERVER_URL}</p>
       <header className="App-header">
         {roomId && (
           <RoomConnectionProvider

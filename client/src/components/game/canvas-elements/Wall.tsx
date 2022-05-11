@@ -1,7 +1,7 @@
 import React from 'react'
 import { Container, Sprite } from '@inlet/react-pixi'
 import { Wall as WallType } from '../game-logic/Game'
-import WallImage from './src/images/wall.jpg'
+import WallImage from '../../../images/wall.jpg'
 
 interface Props {
   coordinates: WallType[]
