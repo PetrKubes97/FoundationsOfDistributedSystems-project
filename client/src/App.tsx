@@ -32,6 +32,7 @@ const App: React.FC = () => {
 
   return (
     <div className="App">
+      <p>{import.meta.env.VITE_SERVER_URL}</p>
       <header className="App-header">
         {roomId && (
           <RoomConnectionProvider
@@ -137,7 +138,10 @@ const App: React.FC = () => {
                             <>
                               <button onClick={ping}>Ping!</button>
                               <p ref={pingResultRef} />
-                              <GameScreenControls isRoot={isRoot} gameState={game.gameState}/>
+                              <GameScreenControls
+                                isRoot={isRoot}
+                                gameState={game.gameState}
+                              />
                               <Stage
                                 width={FIELD_WIDTH}
                                 height={FIELD_HEIGHT}
