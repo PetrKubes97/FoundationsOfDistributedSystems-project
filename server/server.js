@@ -1,6 +1,7 @@
 const express = require('express')
 const app = express()
 const http = require('http')
+const path = require('path')
 const server = http.createServer(app)
 const { Server } = require('socket.io')
 
@@ -60,6 +61,8 @@ io.on('connection', (socket) => {
     console.log('user disconnected')
   })
 })
+
+app.use(express.static(path.join(__dirname, '../client/dist')))
 
 server.listen(4000, () => {
   console.log('listening on *:4000')
