@@ -3,6 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
+    "start": "cd server && npm start",
+    "build": "cd client && npm run build",
     "dev": "concurrently npm:clientDev npm:serverDev -c bgRed.bold,bgBlue.bold",
     "clientDev": "cd client && npx vite --host",
     "serverDev": "cd server && npm start",
