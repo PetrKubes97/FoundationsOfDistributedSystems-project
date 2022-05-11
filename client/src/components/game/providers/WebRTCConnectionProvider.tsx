@@ -11,6 +11,11 @@ const configuration = {
       urls: ['stun:openrelay.metered.ca:80', 'stun:stun.l.google.com:19302'],
     },
     {
+      urls: ['turn:188.166.99.9:3478'],
+      username: 'a',
+      credential: 'a',
+    },
+    {
       urls: [
         'turn:openrelay.metered.ca:80',
         'turn:openrelay.metered.ca:443',
