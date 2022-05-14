@@ -30,6 +30,7 @@ const tankSprite = (tint: number) => {
 };
 
 export const GameScreenControls: React.FC<Props> = ({ isRoot, gameState }) => {
+  const isOpponentRoot = !isRoot;
 
   return (
     <>
@@ -39,7 +40,7 @@ export const GameScreenControls: React.FC<Props> = ({ isRoot, gameState }) => {
             {tankSprite(isRoot ? gameState.rootTank.color : gameState.nodeTank.color)}
         </div>
         <div style={{ marginLeft: '50%', height: '100px' }}>
-          <div>Opponent:</div>
+          <div>{`Opponent${isOpponentRoot ? ' (root)' : ' (node)'}:`}</div>
           {tankSprite(isRoot ? gameState.nodeTank.color : gameState.rootTank.color)}
         </div>
       </div>

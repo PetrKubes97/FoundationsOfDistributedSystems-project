@@ -84,7 +84,7 @@ const App: React.FC = () => {
 
                       if (data == PING_REPLY) {
                         const millisSinceStart = performance.now() - pingStart
-                        pingResultRef.current!.innerText = `${millisSinceStart} ms`
+                        pingResultRef.current!.innerText = `${millisSinceStart.toFixed(3)} ms`
                         return
                       }
 
@@ -149,6 +149,10 @@ const App: React.FC = () => {
                                   tick={onGameTick}
                                 />
                               </Stage>
+                              <br></br>
+                              <br></br>
+                              <button onClick={ping}>Ping opponent!</button>
+                              <p ref={pingResultRef} />
                             </>
                           )
                         }}
@@ -166,7 +170,7 @@ const App: React.FC = () => {
         <a
           style={{ marginTop: '32px' }}
           className="App-link"
-          href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+          href="https://github.com/PetrKubes97/FoundationsOfDistributedSystems-project"
           target="_blank"
           rel="noopener noreferrer"
         >
