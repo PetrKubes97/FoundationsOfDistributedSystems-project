@@ -4,7 +4,7 @@ Run the command in the root of the project:
 ```
 npm run dev
 ```
-
+The game will now run on http://127.0.0.1:3000/
 
 ## Deployed Game:
 
