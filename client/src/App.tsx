@@ -135,8 +135,6 @@ const App: React.FC = () => {
                           setKeyPressHandler(onKeysUpdated)
                           return (
                             <>
-                              <button onClick={ping}>Ping!</button>
-                              <p ref={pingResultRef} />
                               <GameScreenControls isRoot={isRoot} gameState={game.gameState}/>
                               <Stage
                                 width={FIELD_WIDTH}
@@ -176,6 +174,7 @@ const App: React.FC = () => {
         >
           Source Code
         </a>
+        <br></br>
       </header>
     </div>
   )
