@@ -1,3 +1,13 @@
+## Run Game Locally:
+
+Run the command in the root of the project:
+```
+npm run dev
+```
+
+
+## Deployed Game:
+
 A deployed version of the Tank game can be found on the following URL:
 
 https://tank-app-nseux.ondigitalocean.app/
