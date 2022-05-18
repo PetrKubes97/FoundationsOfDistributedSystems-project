@@ -13,7 +13,7 @@ import {
 } from './components/game/providers/WebRTCConnectionProvider'
 import { Game, UserAction } from './components/game/game-logic/Game'
 import TankGame from './components/game/TankGame'
-import { AppProvider, Stage } from '@inlet/react-pixi'
+import { AppProvider, Stage, useApp } from '@inlet/react-pixi'
 import { GameScreenControls } from './components/game/GameScreenControls'
 import { FIELD_HEIGHT, FIELD_WIDTH } from './config'
 import {
@@ -21,6 +21,7 @@ import {
   KeyControlsProvider,
 } from './components/game/providers/KeyControlsProvider'
 import { keysToAction } from './components/game/gameHelpers'
+import { useForceUpdate } from './components/otherHelpers'
 
 const App: React.FC = () => {
   const [searchParams] = useSearchParams()

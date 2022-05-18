@@ -4,16 +4,16 @@ import { Key } from './providers/KeyControlsProvider'
 import { Engine, Rotate } from './game-logic/enums'
 
 export const map: number[][] = [
-  [0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
-  [0, 1, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 1, 0, 0, 0, 1, 1, 1, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
-  [0, 0, 0, 0, 0, 0, 0, 1, 0, 0],
+  [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+  [0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
+  [0, 0, 0, 0, 0, 1, 1, 1, 0, 0],
   [0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 1, 1, 0, 0],
+  [0, 1, 1, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-  [0, 0, 0, 1, 0, 0, 1, 1, 0, 0],
   [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
   [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+  [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 ]
 
 // TODO: This assumes both map and canvas being square
@@ -65,15 +65,20 @@ export const determineRotation = (
   }
 }
 
-export const checkCollision = (pos: Vector, size: number, wallPos: Wall) => {
-  const halfTankSize = size / 2
-  const halfWallSize = wallPos.size / 2
+export const checkCollision = (
+  centerA: Vector,
+  sizeA: number,
+  centerB: Vector,
+  sizeB: number
+) => {
+  const halfASize = sizeA / 2
+  const halfBSize = sizeB / 2
 
   return (
-    pos.x + halfTankSize > wallPos.x - halfWallSize &&
-    pos.x - halfTankSize < wallPos.x + halfWallSize &&
-    pos.y + halfTankSize > wallPos.y - halfWallSize &&
-    pos.y - halfTankSize < wallPos.y + halfWallSize
+    centerA.x + halfASize > centerB.x - halfBSize &&
+    centerA.x - halfASize < centerB.x + halfBSize &&
+    centerA.y + halfASize > centerB.y - halfBSize &&
+    centerA.y - halfASize < centerB.y + halfBSize
   )
 }
 
