@@ -9,23 +9,12 @@ import {
   TANK_WIDTH,
 } from '../../../config'
 import { TankState, UserAction } from '../game-logic/Game'
-import { determineRotation } from '../gameHelpers'
 
 interface Props {
   tankState: TankState
-  userAction: UserAction
 }
 
-export const Tank: React.FC<Props> = ({ tankState, userAction }) => {
-  const previousRotation = useRef(0)
-
-  const rotation = determineRotation(
-    userAction.direction.x,
-    userAction.direction.y,
-    previousRotation.current
-  )
-  previousRotation.current = rotation
-
+export const Tank: React.FC<Props> = ({ tankState }) => {
   return (
     <Sprite
       x={tankState.pos.x}
@@ -35,7 +24,7 @@ export const Tank: React.FC<Props> = ({ tankState, userAction }) => {
       tint={tankState.color}
       width={TANK_WIDTH}
       height={TANK_HEIGHT}
-      rotation={(rotation * Math.PI) / 180}
+      rotation={tankState.rotation}
     />
   )
 }

@@ -84,7 +84,9 @@ const App: React.FC = () => {
 
                       if (data == PING_REPLY) {
                         const millisSinceStart = performance.now() - pingStart
-                        pingResultRef.current!.innerText = `${millisSinceStart.toFixed(3)} ms`
+                        pingResultRef.current!.innerText = `${millisSinceStart.toFixed(
+                          3
+                        )} ms`
                         return
                       }
 
@@ -135,7 +137,10 @@ const App: React.FC = () => {
                           setKeyPressHandler(onKeysUpdated)
                           return (
                             <>
-                              <GameScreenControls isRoot={isRoot} gameState={game.gameState}/>
+                              <GameScreenControls
+                                isRoot={isRoot}
+                                gameState={game.gameState}
+                              />
                               <Stage
                                 width={FIELD_WIDTH}
                                 height={FIELD_HEIGHT}

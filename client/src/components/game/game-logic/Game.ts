@@ -5,25 +5,35 @@ import {
   TANK_HEIGHT,
   TANK_WIDTH,
 } from '../../../config'
-import tankGame from '../TankGame'
-import { Wall } from '../canvas-elements/Wall'
+import { Engine, Rotate } from './enums'
+
+const rotateToNumber = (rotate: Rotate) => {
+  switch (rotate) {
+    case Rotate.ANTI_CLOCKWISE:
+      return -1.0
+    case Rotate.CLOCKWISE:
+      return 1.0
+    case Rotate.NO_ROTATION:
+      return 0.0
+  }
+
+  return 0.0
+}
 
 export type UserAction = {
-  direction: Direction
+  engine: Engine
+  rotate: Rotate
   shooting: boolean
 }
 
-export type Direction = {
-  x: number
-  y: number
-}
-
 export type TankState = {
-  pos: Coordinate
+  pos: Vector
+  rotation: number
   color: number
+  lastShot: Date
 }
 
-export type Coordinate = {
+export type Vector = {
   x: number
   y: number
 }
@@ -39,6 +49,11 @@ export type UserActions = {
   nodeAction: UserAction
 }
 
+export type Projectile = {
+  position: Vector
+  direction: Vector
+}
+
 // User actions are actually part of the game state, since they determine the
 // tanks orientation
 export type GameState = {
@@ -46,6 +61,7 @@ export type GameState = {
   nodeTank: TankState
   wallCoordinates: Wall[]
   userActions: UserActions
+  projectiles: Projectile[]
 }
 
 export class Game {
@@ -58,28 +74,41 @@ export class Game {
           x: 0,
           y: 0,
         },
+        rotation: 0,
         color: 0x808000,
+        lastShot: new Date(),
       },
       rootTank: {
         pos: {
           x: FIELD_WIDTH,
           y: 0,
         },
+        rotation: Math.PI,
         color: 0xa9513f,
+        lastShot: new Date(),
       },
       wallCoordinates: mapToCoordinates(map),
       userActions: {
-        nodeAction: { direction: { x: 0, y: 0 }, shooting: false },
-        rootAction: { direction: { x: 0, y: 0 }, shooting: false },
+        nodeAction: {
+          engine: Engine.NO_MOVEMENT,
+          rotate: Rotate.NO_ROTATION,
+          shooting: false,
+        },
+        rootAction: {
+          engine: Engine.NO_MOVEMENT,
+          rotate: Rotate.NO_ROTATION,
+          shooting: false,
+        },
       },
+      projectiles: [],
     }
   }
 
   update() {
     const calculateClampedPosition = (
-      direction: Direction,
-      position: Coordinate
-    ): Coordinate => {
+      direction: Vector,
+      position: Vector
+    ): Vector => {
       let newPositionX = Math.min(
         Math.max(TANK_WIDTH / 2, position.x + direction.x),
         FIELD_WIDTH - TANK_WIDTH / 2
@@ -110,13 +139,80 @@ export class Game {
       }
     }
 
+    const PROJECTILE_SPEED = 5
+    for (let i = 0; i < this.gameState.projectiles.length; i++) {
+      const direction = this.gameState.projectiles[i].direction
+      this.gameState.projectiles[i].position.x += direction.x * PROJECTILE_SPEED
+      this.gameState.projectiles[i].position.y += direction.y * PROJECTILE_SPEED
+      // TODO detect explosion
+    }
+
+    const addProjectile = (tank: TankState) => {
+      tank.lastShot = new Date()
+      this.gameState.projectiles.push({
+        position: {
+          x: tank.pos.x,
+          y: tank.pos.y,
+        },
+        direction: {
+          x: Math.cos(tank.rotation),
+          y: Math.sin(tank.rotation),
+        },
+      })
+    }
+
+    const nodeAction = this.gameState.userActions.nodeAction
+    const nodeTank = this.gameState.nodeTank
+    const rootAction = this.gameState.userActions.rootAction
+    const rootTank = this.gameState.rootTank
+
+    const RELOAD_TIME = 0.5
+    const shouldShoot = (tank: TankState, action: UserAction) => {
+      return (
+        action.shooting &&
+        new Date().getTime() - tank.lastShot.getTime() > RELOAD_TIME * 1000
+      )
+    }
+
+    if (shouldShoot(rootTank, rootAction)) {
+      addProjectile(rootTank)
+    }
+
+    if (shouldShoot(nodeTank, nodeAction)) {
+      addProjectile(nodeTank)
+    }
+
+    const rotationToDirection = (engine: Engine, rotation: number): Vector => {
+      if (engine == Engine.NO_MOVEMENT) return { x: 0, y: 0 }
+      const directionMultiplier = engine == Engine.FORWARD ? 1 : -1
+
+      return {
+        x: Math.cos(rotation) * directionMultiplier,
+        y: Math.sin(rotation) * directionMultiplier,
+      }
+    }
+
+    const ROTATION_SPEED = 0.03
+    this.gameState.rootTank.rotation +=
+      rotateToNumber(this.gameState.userActions.rootAction.rotate) *
+      ROTATION_SPEED
+    this.gameState.nodeTank.rotation +=
+      rotateToNumber(this.gameState.userActions.nodeAction.rotate) *
+      ROTATION_SPEED
+
     this.gameState.rootTank.pos = calculateClampedPosition(
-      this.gameState.userActions.rootAction.direction,
+      rotationToDirection(
+        this.gameState.userActions.rootAction.engine,
+        this.gameState.rootTank.rotation
+      ),
       this.gameState.rootTank.pos
     )
 
     this.gameState.nodeTank.pos = calculateClampedPosition(
-      this.gameState.userActions.nodeAction.direction,
+      rotationToDirection(
+        this.gameState.userActions.nodeAction.engine,
+        this.gameState.nodeTank.rotation
+      ),
       this.gameState.nodeTank.pos
     )
   }

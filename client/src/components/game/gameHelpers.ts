@@ -1,6 +1,7 @@
 import { FIELD_WIDTH } from '../../config'
-import { Coordinate, Direction, UserAction, Wall } from './game-logic/Game'
+import { UserAction, Vector, Wall } from './game-logic/Game'
 import { Key } from './providers/KeyControlsProvider'
+import { Engine, Rotate } from './game-logic/enums'
 
 export const map: number[][] = [
   [0, 1, 0, 0, 0, 1, 0, 0, 0, 0],
@@ -65,7 +66,7 @@ export const determineRotation = (
 }
 
 export const checkCollision = (
-  tankPos: Coordinate,
+  tankPos: Vector,
   tankSize: number,
   wallPos: Wall
 ) => {
@@ -80,56 +81,40 @@ export const checkCollision = (
   )
 }
 
-const keyToDirMapping = {
-  [Key.up]: { x: 0, y: -1 },
-  [Key.down]: { x: 0, y: 1 },
-  [Key.left]: { x: -1, y: 0 },
-  [Key.right]: { x: 1, y: 0 },
+const keyToRotationMapping = {
+  [Key.right]: Rotate.CLOCKWISE,
+  [Key.left]: Rotate.ANTI_CLOCKWISE,
 }
-const keyToDirections = (
-  lastPressed: Key,
-  secondLastPressed: Key | undefined
-): Direction => {
-  if (secondLastPressed === undefined) {
-    return keyToDirMapping[lastPressed]
-  }
 
-  const dir1 = keyToDirMapping[lastPressed]
-  const dir2 = keyToDirMapping[secondLastPressed]
-
-  const directionalSpeed =
-    Math.abs(dir1.x) + Math.abs(dir2.y) == 2 ||
-    Math.abs(dir1.y) + Math.abs(dir2.x) == 2
-      ? 0.7071067812 // sqrt(2) / 2
-      : 1
-
-  // I'm genius 🤪
-  return {
-    x: (dir1.x + dir2.x) * directionalSpeed,
-    y: (dir1.y + dir2.y) * directionalSpeed,
-  }
+const keyToEngine = {
+  [Key.up]: Engine.FORWARD,
+  [Key.down]: Engine.BACKWARD,
 }
 
 export const keysToAction = (keys: Key[]): UserAction => {
-  let newAction: UserAction = {
-    direction: { x: 0, y: 0 },
-    shooting: false,
-  }
-
-  if (keys.length >= 1) {
-    const lastPressedKey = keys[keys.length - 1]
-    let secondLastPressedKey: Key | undefined = undefined
-    if (keys.length >= 2) {
-      secondLastPressedKey = keys[keys.length - 2]
-    }
-
-    newAction = {
-      direction: keyToDirections(lastPressedKey, secondLastPressedKey),
-      shooting: false,
+  let rotate: Rotate = Rotate.NO_ROTATION
+  for (const key of keys) {
+    if (key == Key.left || key == Key.right) {
+      rotate = keyToRotationMapping[key]
+      break
     }
   }
 
-  return newAction
+  let engine: Engine = Engine.NO_MOVEMENT
+  for (const key of keys) {
+    if (key == Key.up || key == Key.down) {
+      engine = keyToEngine[key]
+      break
+    }
+  }
+
+  const shooting = !!keys.find((key) => key === Key.space)
+
+  return {
+    rotate,
+    engine,
+    shooting,
+  }
 }
 
 export {}

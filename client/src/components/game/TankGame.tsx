@@ -4,13 +4,9 @@ import { FIELD_HEIGHT, FIELD_WIDTH } from '../../config'
 import Tank from './canvas-elements/Tank'
 import { Wall } from './canvas-elements/Wall'
 import { GameScreenControls } from './GameScreenControls'
-import {
-  Direction,
-  Game,
-  GameState,
-  UserAction,
-  UserActions,
-} from './game-logic/Game'
+import { Game, GameState, UserAction, UserActions } from './game-logic/Game'
+import { Circle } from 'pixi.js'
+import { Projectile } from './canvas-elements/Projectile'
 
 type props = {
   game: Game
@@ -25,13 +21,7 @@ const useForceUpdate = () => {
 
 export const TankGame: React.FC<props> = ({ game, tick, isRoot }) => {
   const forceUpdate = useForceUpdate()
-
   const gameState = game.gameState
-  const userActions = game.gameState.userActions
-
-  const currentUserAction = isRoot
-    ? userActions.rootAction
-    : userActions.nodeAction
 
   useTick(() => {
     tick()
@@ -43,14 +33,11 @@ export const TankGame: React.FC<props> = ({ game, tick, isRoot }) => {
 
   return (
     <>
-      <Tank
-        tankState={gameState.rootTank}
-        userAction={userActions.rootAction}
-      />
-      <Tank
-        tankState={gameState.nodeTank}
-        userAction={userActions.nodeAction}
-      />
+      {gameState.projectiles.map((projectile) => (
+        <Projectile x={projectile.position.x} y={projectile.position.y} />
+      ))}
+      <Tank tankState={gameState.rootTank} />
+      <Tank tankState={gameState.nodeTank} />
       <Wall coordinates={gameState.wallCoordinates} />
     </>
   )
