@@ -2,6 +2,7 @@ import { checkCollision, map, mapToCoordinates } from '../gameHelpers'
 import {
   FIELD_HEIGHT,
   FIELD_WIDTH,
+  PROJECTILE_RADIUS,
   TANK_HEIGHT,
   TANK_WIDTH,
 } from '../../../config'
@@ -105,6 +106,8 @@ export class Game {
   }
 
   update() {
+    const wallCoordinates = this.gameState.wallCoordinates
+
     const calculateClampedPosition = (
       direction: Vector,
       position: Vector
@@ -118,7 +121,6 @@ export class Game {
         FIELD_HEIGHT - TANK_HEIGHT / 2
       )
 
-      const wallCoordinates = this.gameState.wallCoordinates
       for (const wallCoordinate of wallCoordinates) {
         if (
           checkCollision({ x: newPositionX, y: newPositionY }, TANK_HEIGHT, {
@@ -142,9 +144,21 @@ export class Game {
     const PROJECTILE_SPEED = 5
     for (let i = 0; i < this.gameState.projectiles.length; i++) {
       const direction = this.gameState.projectiles[i].direction
-      this.gameState.projectiles[i].position.x += direction.x * PROJECTILE_SPEED
-      this.gameState.projectiles[i].position.y += direction.y * PROJECTILE_SPEED
-      // TODO detect explosion
+      const position = this.gameState.projectiles[i].position
+      position.x += direction.x * PROJECTILE_SPEED
+      position.y += direction.y * PROJECTILE_SPEED
+
+      for (const wallCoordinate of wallCoordinates) {
+        if (
+          checkCollision(position, PROJECTILE_RADIUS * 2, {
+            x: wallCoordinate.x + wallCoordinate.size / 2,
+            y: wallCoordinate.y + wallCoordinate.size / 2,
+            size: wallCoordinate.size,
+          })
+        ) {
+          this.gameState.projectiles[i].direction = { x: 0, y: 0 }
+        }
+      }
     }
 
     const addProjectile = (tank: TankState) => {

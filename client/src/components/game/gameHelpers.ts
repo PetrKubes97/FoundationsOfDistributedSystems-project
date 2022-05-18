@@ -65,19 +65,15 @@ export const determineRotation = (
   }
 }
 
-export const checkCollision = (
-  tankPos: Vector,
-  tankSize: number,
-  wallPos: Wall
-) => {
-  const halfTankSize = tankSize / 2
+export const checkCollision = (pos: Vector, size: number, wallPos: Wall) => {
+  const halfTankSize = size / 2
   const halfWallSize = wallPos.size / 2
 
   return (
-    tankPos.x + halfTankSize > wallPos.x - halfWallSize &&
-    tankPos.x - halfTankSize < wallPos.x + halfWallSize &&
-    tankPos.y + halfTankSize > wallPos.y - halfWallSize &&
-    tankPos.y - halfTankSize < wallPos.y + halfWallSize
+    pos.x + halfTankSize > wallPos.x - halfWallSize &&
+    pos.x - halfTankSize < wallPos.x + halfWallSize &&
+    pos.y + halfTankSize > wallPos.y - halfWallSize &&
+    pos.y - halfTankSize < wallPos.y + halfWallSize
   )
 }
 
