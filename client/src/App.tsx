@@ -13,7 +13,7 @@ import {
 } from './components/game/providers/WebRTCConnectionProvider'
 import { Game, UserAction } from './components/game/game-logic/Game'
 import TankGame from './components/game/TankGame'
-import { AppProvider, Stage } from '@inlet/react-pixi'
+import { AppProvider, Stage, useApp } from '@inlet/react-pixi'
 import { GameScreenControls } from './components/game/GameScreenControls'
 import { FIELD_HEIGHT, FIELD_WIDTH } from './config'
 import {
@@ -21,6 +21,7 @@ import {
   KeyControlsProvider,
 } from './components/game/providers/KeyControlsProvider'
 import { keysToAction } from './components/game/gameHelpers'
+import { useForceUpdate } from './components/otherHelpers'
 
 const App: React.FC = () => {
   const [searchParams] = useSearchParams()
@@ -84,7 +85,9 @@ const App: React.FC = () => {
 
                       if (data == PING_REPLY) {
                         const millisSinceStart = performance.now() - pingStart
-                        pingResultRef.current!.innerText = `${millisSinceStart} ms`
+                        pingResultRef.current!.innerText = `${millisSinceStart.toFixed(
+                          3
+                        )} ms`
                         return
                       }
 
@@ -135,9 +138,8 @@ const App: React.FC = () => {
                           setKeyPressHandler(onKeysUpdated)
                           return (
                             <>
-                              <button onClick={ping}>Ping!</button>
-                              <p ref={pingResultRef} />
                               <GameScreenControls
+
                                 isRoot={isRoot}
                                 gameState={game.gameState}
                               />
@@ -152,6 +154,10 @@ const App: React.FC = () => {
                                   tick={onGameTick}
                                 />
                               </Stage>
+                              <br></br>
+                              <br></br>
+                              <button onClick={ping}>Ping opponent!</button>
+                              <p ref={pingResultRef} />
                             </>
                           )
                         }}
@@ -169,12 +175,13 @@ const App: React.FC = () => {
         <a
           style={{ marginTop: '32px' }}
           className="App-link"
-          href="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+          href="https://github.com/PetrKubes97/FoundationsOfDistributedSystems-project"
           target="_blank"
           rel="noopener noreferrer"
         >
           Source Code
         </a>
+        <br></br>
       </header>
     </div>
   )

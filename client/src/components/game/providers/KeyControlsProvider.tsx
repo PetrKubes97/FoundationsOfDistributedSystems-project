@@ -5,6 +5,7 @@ export enum Key {
   down = 'down',
   left = 'left',
   right = 'right',
+  space = 'space',
 }
 
 type KeyPressHandler = (pressed: Key[]) => void
@@ -50,6 +51,9 @@ export const KeyControlsProvider: React.FC<Props> = ({ child }) => {
           break
         case 'ArrowRight':
           addOrRemoveFromCurrentlyPressed(isUp, Key.right)
+          break
+        case 'Space':
+          addOrRemoveFromCurrentlyPressed(isUp, Key.space)
           break
       }
       localHandler?.([...currentlyPressedKeys])
