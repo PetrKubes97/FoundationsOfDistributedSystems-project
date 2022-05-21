@@ -81,8 +81,8 @@ export const RoomConnectionProvider: FC<Props> = ({ roomId, child }) => {
   return (
     <>
       <div>
-        <p>RoomId: {(connectionState.roomId)}</p>
-        <p>{JSON.stringify(connectionState)}</p>
+        <p style={{fontSize: '18px'}}>RoomId: {(connectionState.roomId)}</p>
+        <p style={{fontSize: '18px', marginTop: '-15px'}}>Player count: {(connectionState.playerCnt)}</p>
         {child(connectionState)}
       </div>
     </>
