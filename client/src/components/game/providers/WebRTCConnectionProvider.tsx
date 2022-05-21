@@ -206,9 +206,11 @@ export const WebRTCConnectionProvider: FC<Props> = ({
 
   return (
     <>
-      <b>WebRTC connection state for nerds:</b>
-      <p>{webRTCConnection.state}</p>
-      <p style={{ whiteSpace: 'pre-wrap' }}>
+      <b style={{ fontSize: '18px' }}>Current connection state:</b>
+      <p style={{ fontSize: '13px', marginTop: '0px', textAlign: 'center' }}>
+        {webRTCConnection.state == 1 ? 'You are using WebRTC' : 'You are not using WebRTC at the moment'}
+      </p>
+      <p style={{ whiteSpace: 'pre', textAlign: 'center', fontSize: '13px', marginTop: '-25px', marginBottom: '40px' }}>
         {webRTCConnection.connectionDescription}
       </p>
       {child(webRTCConnection)}
